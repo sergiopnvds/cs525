@@ -18,9 +18,7 @@ RC createPageFile (char *fileName){
   fileInfo.curPagePos = 0;
 
   fwrite(&fileInfo, sizeof(SM_FileHeader), 1, file);
-  
-  for(i = sizeof(SM_FileHeader); i < PAGE_SIZE + sizeof(SM_FileHeader); i++)
-    fwrite(&eof, sizeof(eof), 1, file);
+  fwrite(&eof, sizeof(eof), PAGE_SIZE, file);
   
   fclose(file);
   
@@ -75,33 +73,40 @@ RC readLastBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 };
 
 RC readPreviousBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
-	RC dummy = 0;
-	return dummy;
+	return readBlock(fHandle->curPagePos-1, fHandle, memPage);
 };
 RC readCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
-	RC dummy = 0;
-	return dummy;
+	return readBlock(fHandle->curPagePos, fHandle, memPage);
 };
 RC readNextBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
-	RC dummy = 0;
-	return dummy;
+	return readBlock(fHandle->curPagePos+1, fHandle, memPage);
 };
 
 /* writing blocks to a page file */
 RC writeBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
-	RC dummy = 0;
-	return dummy;
+  if(pageNum < 0 || pageNum >= fHandle->totalNumPages)
+    return RC_READ_NON_EXISTING_PAGE;
+  int offset = pageNum - fHandle->curPagePos;
+  fwrite(memPage, PAGE_SIZE, 1, fHandle->mgmtInfo + offset*PAGE_SIZE);
 };
+
+
 RC writeCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
-	RC dummy = 0;
-	return dummy;
+	return writeBlock(fHandle->curPagePos, fHandle, memPage);
 };
+
 RC appendEmptyBlock (SM_FileHandle *fHandle){
-	RC dummy = 0;
-	return dummy;
+  int i = 0;
+  char eof = '\0';
+  fwrite(&eof, sizeof(eof), PAGE_SIZE, fHandle->mgmtInfo);
 };
+
 RC ensureCapacity (int numberOfPages, SM_FileHandle *fHandle){
-	RC dummy = 0;
-	return dummy;
+	int numberToEnsure = numberOfPages - fHandle->totalNumPages;
+	if(numberToEnsure > 0){
+		int i = 0;
+		for(i = 0; i < numberToEnsure; i++)
+			appendEmptyBlock(fHandle);
+	}
 };
 
