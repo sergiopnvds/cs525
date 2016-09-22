@@ -36,10 +36,8 @@ RC openPageFile (char *fileName, SM_FileHandle *fHandle){
     fHandle->totalNumPages = fileInfo.totalNumPages;
     fHandle->curPagePos = fileInfo.curPagePos;
     fHandle->mgmtInfo = file;
-    fclose(file);
     return RC_OK;
   }else{
-    fclose(file);
     return RC_FILE_NOT_FOUND;
   }
 };
@@ -56,17 +54,26 @@ RC destroyPageFile (char *fileName){
 
 /* reading blocks from disc */
 RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
-	RC dummy = 0;
-	return dummy;
+  if(pageNum < 0 || pageNum >= fHandle->totalNumPages)
+    return RC_READ_NON_EXISTING_PAGE;
+  memPage = malloc(PAGE_SIZE);
+  int offset = pageNum - fHandle->curPagePos;
+  fread(memPage, PAGE_SIZE, 1, fHandle->mgmtInfo + offset*PAGE_SIZE);
+  return RC_OK;
 };
+
 int getBlockPos (SM_FileHandle *fHandle){
-	int dummy = 0;
-	return dummy;
+	return fHandle->curPagePos;
 };
+
 RC readFirstBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
-	RC dummy = 0;
-	return dummy;
+	return readBlock(0, fHandle, memPage);
 };
+
+RC readLastBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
+	return readBlock(fHandle->totalNumPages-1, fHandle, memPage);
+};
+
 RC readPreviousBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 	RC dummy = 0;
 	return dummy;
@@ -76,10 +83,6 @@ RC readCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 	return dummy;
 };
 RC readNextBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
-	RC dummy = 0;
-	return dummy;
-};
-RC readLastBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 	RC dummy = 0;
 	return dummy;
 };

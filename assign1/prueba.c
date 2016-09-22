@@ -2,6 +2,7 @@
 #include "storage_mgr.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef struct SM_FileHeader {
   int totalNumPages;
@@ -12,7 +13,7 @@ RC createPageFile (char *fileName){
   FILE *file = fopen(fileName, "w");
   
   int i = 0;
-  char eof = '\0';
+  char eof = 'A';
 
   struct SM_FileHeader fileInfo;
   fileInfo.totalNumPages = 1;
@@ -38,10 +39,8 @@ RC openPageFile (char *fileName, SM_FileHandle *fHandle){
     fHandle->totalNumPages = fileInfo.totalNumPages;
     fHandle->curPagePos = fileInfo.curPagePos;
     fHandle->mgmtInfo = file;
-    fclose(file);
     return RC_OK;
   }else{
-    fclose(file);
     return RC_FILE_NOT_FOUND;
   }
 };
@@ -56,6 +55,16 @@ RC destroyPageFile (char *fileName){
   return RC_OK;
 };
 
+RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
+  if(pageNum < 0 || pageNum >= fHandle->totalNumPages)
+    return RC_READ_NON_EXISTING_PAGE;
+  memPage = malloc(PAGE_SIZE);
+  int offset = pageNum - fHandle->curPagePos;
+  fread(memPage, PAGE_SIZE, 1, fHandle->mgmtInfo + offset*PAGE_SIZE);
+  printf("%s\n", memPage);
+  return RC_OK;
+};
+
 int main (void)
 {
   createPageFile("hola_k_ase.txt");
@@ -65,7 +74,9 @@ int main (void)
   }else{
     printf("fileName: %s, totalNumPages: %i, curPagePos: %i\n", fHandle.fileName, fHandle.totalNumPages, fHandle.curPagePos);
   }
+  SM_PageHandle pageHandle;
+  readBlock(0, &fHandle, pageHandle);
   closePageFile(&fHandle);
-  destroyPageFile("hola_k_ase.txt");
+  //destroyPageFile("hola_k_ase.txt");
   return 0;
 }
