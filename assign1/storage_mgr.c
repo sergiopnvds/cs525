@@ -6,10 +6,16 @@
 void initStorageManager (){
 	return;
 };
+
 RC createPageFile (char *fileName){
-	RC dummy = 0;
-	return dummy;
+	FILE *file = fopen(filename, "w");
+	int i = 0;
+	char eof = '\0';
+	for(i = 0; i <= PAGE_SIZE; i++)
+		fwrite(&eof, sizeof(eof), 1, file);
+	fclose(file);
 };
+
 RC openPageFile (char *fileName, SM_FileHandle *fHandle){
 	RC dummy = 0;
 	return dummy;
