@@ -27,7 +27,7 @@ void initStorageManager(){
 * Parameters:
 *       int totalNumPages: total number of pages in file.
 *       int curPagePos: current position in page file to reading and writing.
-*       SM_FileHandle *fHandle: pointer to open dile handle. 
+*       SM_FileHandle *fHandle: pointer to open file handle. 
 * Return:
 *       void
 * Author:
@@ -87,9 +87,9 @@ RC createPageFile (char *fileName){
 * Function Name: openPageFile
 *
 * Description:
-*
 * Parameters:
-*
+*       char *fileName: File name to be opened.
+*       SM_FileHandle *fHandle: pointer to open file handle. 
 * Return:
 *
 * Author:
@@ -121,7 +121,7 @@ RC openPageFile (char *fileName, SM_FileHandle *fHandle){
 * Description:
 *
 * Parameters:
-*
+*       SM_FileHandle *fHandle: pointer to open file handle. 
 * Return:
 *
 * Author:
@@ -143,7 +143,7 @@ RC closePageFile (SM_FileHandle *fHandle){
 * Description:
 *
 * Parameters:
-*
+*       char *fileName: File name to be destroyed.
 * Return:
 *
 * Author:
@@ -164,9 +164,11 @@ RC destroyPageFile (char *fileName){
 * Function Name: readBlock
 *
 * Description:
-*
-* Parameters:
-*
+*       Stores specified page in memory.
+* Parameters: 
+*       int pageNum: number of page to be read.
+*       SM_FileHandle *fHandle: pointer to open file handle.
+*       SM_PageHandle memPage: page handle to store read page in memory.
 * Return:
 *
 * Author:
@@ -190,9 +192,9 @@ RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
 * Function Name: getBlockPos
 *
 * Description:
-*
+*       Gets current page position
 * Parameters:
-*
+*       SM_FileHandle *fHandle: pointer to open file handle.
 * Return:
 *
 * Author:
@@ -211,9 +213,10 @@ int getBlockPos (SM_FileHandle *fHandle){
 * Function Name: readFirstBlock
 *
 * Description:
-*
+*       Stores first page in memory.
 * Parameters:
-*
+*       SM_FileHandle *fHandle: pointer to open file handle.
+*       SM_PageHandle memPage: page handle to store read page in memory.
 * Return:
 *
 * Author:
@@ -232,9 +235,10 @@ RC readFirstBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 * Function Name: readLastBlock
 *
 * Description:
-*
+*       Stores last page in memory.
 * Parameters:
-*
+*       SM_FileHandle *fHandle: pointer to open file handle.
+*       SM_PageHandle memPage: page handle to store read page in memory.
 * Return:
 *
 * Author:
@@ -253,9 +257,10 @@ RC readLastBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 * Function Name: readPreviousBlock
 *
 * Description:
-*
+*       Stores previous page to current in memory.
 * Parameters:
-*
+*       SM_FileHandle *fHandle: pointer to open file handle.
+*       SM_PageHandle memPage: page handle to store read page in memory.
 * Return:
 *
 * Author:
@@ -274,9 +279,10 @@ RC readPreviousBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 * Function Name: readCurrentBlock
 *
 * Description:
-*
+*       Stores current page in memory.
 * Parameters:
-*
+*       SM_FileHandle *fHandle: pointer to open file handle.
+*       SM_PageHandle memPage: page handle to store read page in memory.
 * Return:
 *
 * Author:
@@ -295,9 +301,10 @@ RC readCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 * Function Name: readNextBlock
 *
 * Description:
-*
+*       Stores next page to current in memory.
 * Parameters:
-*
+*       SM_FileHandle *fHandle: pointer to open file handle.
+*       SM_PageHandle memPage: page handle to store read page in memory.
 * Return:
 *
 * Author:
@@ -317,9 +324,11 @@ RC readNextBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 * Function Name: writeBlock
 *
 * Description:
-*
+*       Writes page read from memory to page file.
 * Parameters:
-*
+*       int pageNum: number of page to be writed.
+*       SM_FileHandle *fHandle: pointer to open file handle.
+*       SM_PageHandle memPage: page handle to read page from memory.
 * Return:
 *
 * Author:
@@ -342,9 +351,10 @@ RC writeBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
 * Function Name: writeCurrentBlock
 *
 * Description:
-*
+*       Writes page read from memory to current page.
 * Parameters:
-*
+*       SM_FileHandle *fHandle: pointer to open file handle.
+*       SM_PageHandle memPage: page handle to read page from memory.
 * Return:
 *
 * Author:
@@ -363,9 +373,9 @@ RC writeCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 * Function Name: appendEmptyBlock
 *
 * Description:
-*
+*       Writes empty page to the end of page file.
 * Parameters:
-*
+*       SM_FileHandle *fHandle: pointer to open file handle.
 * Return:
 *
 * Author:
@@ -392,9 +402,10 @@ RC appendEmptyBlock (SM_FileHandle *fHandle){
 * Function Name: ensureCapacity
 *
 * Description:
-*
+*       Writes empty pages while page file has not a given number of them.
 * Parameters:
-*
+*       int numberToEnsure: number of pages that page file should have.
+*       SM_FileHandle *fHandle: pointer to open file handle.
 * Return:
 *
 * Author:
