@@ -8,7 +8,7 @@
 
 extern int errno;
 
-void updateCurrentInformation(int totalNumPages, int curPagePos, SM_FileHandle *fHandle);
+RC updateCurrentInformation(int totalNumPages, int curPagePos, SM_FileHandle *fHandle);
 
 typedef struct SM_FileHeader {
   int totalNumPages;
@@ -50,18 +50,21 @@ RC createPageFile (char *fileName){
     fileInfo.totalNumPages = 1;
     fileInfo.curPagePos = 0;
 
+    errno = 0;
     fwrite(&fileInfo, sizeof(SM_FileHeader), 1, file);
     if(errno != 0){
       fclose(file);
       return RC_WRITE_FAILED;
     }
     for (int i = 0; i < PAGE_SIZE; ++i){
+      errno = 0;
       fwrite(&eof, sizeof(eof), 1, file);
       if(errno != 0){
         fclose(file);
         return RC_WRITE_FAILED;
       }
     }
+    errno = 0;
     fclose(file);
     if(errno == 0)
       return RC_OK;
@@ -99,6 +102,7 @@ RC openPageFile (char *fileName, SM_FileHandle *fHandle){
   FILE *file = fopen(fileName, "r+");
   struct SM_FileHeader fileInfo;
   if (file){
+    errno = 0;
     fread(&fileInfo, sizeof(SM_FileHeader), 1, file);
     if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
     fHandle->fileName = fileName;
@@ -134,6 +138,7 @@ RC openPageFile (char *fileName, SM_FileHandle *fHandle){
  *                                                                  add comments.
 **************************************************************************************************/
 RC closePageFile (SM_FileHandle *fHandle){
+  errno = 0;
   fclose(fHandle->mgmtInfo);
   if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
   return RC_OK;
@@ -162,6 +167,7 @@ RC closePageFile (SM_FileHandle *fHandle){
  *                                                                  add comments.
 **************************************************************************************************/
 RC destroyPageFile (char *fileName){
+  errno = 0;
   remove(fileName);
   if(errno != 0) return RC_FILE_NOT_FOUND;
   return RC_OK;
@@ -194,8 +200,10 @@ RC destroyPageFile (char *fileName){
 RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
   if(pageNum < 0 || pageNum >= fHandle->totalNumPages)
     return RC_READ_NON_EXISTING_PAGE;
+  errno = 0;
   fseek(fHandle->mgmtInfo, sizeof(SM_FileHeader)+pageNum*PAGE_SIZE, SEEK_SET);
   if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
+  errno = 0;
   fread(memPage, PAGE_SIZE, 1, fHandle->mgmtInfo);
   if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
   updateCurrentInformation(fHandle->totalNumPages, pageNum, fHandle);
@@ -392,8 +400,10 @@ RC readNextBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 RC writeBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
   if(pageNum < 0 || pageNum >= fHandle->totalNumPages)
     return RC_READ_NON_EXISTING_PAGE;
+  errno = 0;
   fseek(fHandle->mgmtInfo, sizeof(SM_FileHeader)+pageNum*PAGE_SIZE, SEEK_SET);
   if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
+  errno = 0;
   fwrite(memPage, PAGE_SIZE, 1, fHandle->mgmtInfo);
   if(errno != 0) return RC_WRITE_FAILED;
   return RC_OK;
@@ -454,9 +464,11 @@ RC appendEmptyBlock (SM_FileHandle *fHandle){
   if(file){
     char eof = '\0';
     for(int i = 0; i < PAGE_SIZE; i++){
+      errno = 0;
       fwrite(&eof, sizeof(eof), 1, file);
       if(errno != 0) return RC_WRITE_FAILED;
     }
+    errno = 0;
     fclose(file);
     if(errno != 0) return RC_WRITE_FAILED;
     openPageFile(fHandle->fileName, fHandle);
@@ -494,10 +506,9 @@ RC ensureCapacity (int numberOfPages, SM_FileHandle *fHandle){
   int numberToEnsure = numberOfPages - fHandle->totalNumPages;
   if(numberToEnsure > 0){
     for(int i = 0; i < numberToEnsure; i++){
-      if(appendEmptyBlock(fHandle) != RC_OK)
-        return res;
+      RC res = appendEmptyBlock(fHandle);
+      if(res != RC_OK) return res;
     }
-
   }
   return RC_OK;
 };
@@ -533,8 +544,10 @@ RC updateCurrentInformation(int totalNumPages, int curPagePos, SM_FileHandle *fH
   struct SM_FileHeader fileInfo;
   fileInfo.totalNumPages = fHandle->totalNumPages;
   fileInfo.curPagePos = fHandle->curPagePos;
+  errno = 0;
   fseek(fHandle->mgmtInfo, 0, SEEK_SET);
   if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
+  errno = 0;
   fwrite(&fileInfo, sizeof(fileInfo), 1, fHandle->mgmtInfo);
   if(errno != 0) return RC_WRITE_FAILED;
   return RC_OK;
