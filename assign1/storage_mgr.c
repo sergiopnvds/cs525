@@ -37,9 +37,11 @@ void initStorageManager(){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Main logic.
+ *    2016-09-24  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Error handle.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
+ *    2016-09-27  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Fixed error handle..
 **************************************************************************************************/
 RC createPageFile (char *fileName){
   FILE *file = fopen(fileName, "w");
@@ -94,8 +96,9 @@ RC createPageFile (char *fileName){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main Logic.
+ *    2016-09-25  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Error handle.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC openPageFile (char *fileName, SM_FileHandle *fHandle){
@@ -133,8 +136,9 @@ RC openPageFile (char *fileName, SM_FileHandle *fHandle){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Main Logic.
+ *    2016-09-25  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Error handle.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Added header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC closePageFile (SM_FileHandle *fHandle){
@@ -162,8 +166,9 @@ RC closePageFile (SM_FileHandle *fHandle){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main Logic.
+ *    2016-09-22  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Error handle.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC destroyPageFile (char *fileName){
@@ -193,8 +198,9 @@ RC destroyPageFile (char *fileName){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main logic
+ *    2016-09-25  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Error Handle.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
@@ -227,9 +233,10 @@ RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
  * History:
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
- *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization, main logic..
+ *    2016-09-21  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Main logic..
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Error handle. 
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  dd header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 int getBlockPos (SM_FileHandle *fHandle){
@@ -257,8 +264,8 @@ int getBlockPos (SM_FileHandle *fHandle){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Main logic.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC readFirstBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
@@ -284,8 +291,8 @@ RC readFirstBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC readLastBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
@@ -311,8 +318,8 @@ RC readLastBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main logic.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC readPreviousBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
@@ -338,8 +345,8 @@ RC readPreviousBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main Logic.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC readCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
@@ -365,8 +372,8 @@ RC readCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC readNextBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
@@ -393,9 +400,11 @@ RC readNextBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *    2016-09-25  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Error handle.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
+ *    2016-09-27  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Fixed error handle.
 **************************************************************************************************/
 RC writeBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
   if(pageNum < 0 || pageNum >= fHandle->totalNumPages)
@@ -428,8 +437,8 @@ RC writeBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main logic
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC writeCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
@@ -453,9 +462,10 @@ RC writeCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
  * History:
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
- *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization..
+ *    2016-09-21  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Main logic.
+ *    2016-09-25  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Error handle.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC appendEmptyBlock (SM_FileHandle *fHandle){
@@ -498,8 +508,9 @@ RC appendEmptyBlock (SM_FileHandle *fHandle){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *    2016-09-21  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main Logic,
+ *    2016-09-25  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Error handle.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  add comments.
 **************************************************************************************************/
 RC ensureCapacity (int numberOfPages, SM_FileHandle *fHandle){
@@ -533,9 +544,10 @@ RC ensureCapacity (int numberOfPages, SM_FileHandle *fHandle){
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
  *    2016-09-20  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Initialization.
- *    2016-09-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *    2016-09-20  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Initialization.
- *
+ *    2016-09-21  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main Logic.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Error handle.
+ *    2016-09-26  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *                                                                  add comments.
 **************************************************************************************************/
 
 RC updateCurrentInformation(int totalNumPages, int curPagePos, SM_FileHandle *fHandle){
