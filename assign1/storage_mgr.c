@@ -100,6 +100,7 @@ RC openPageFile (char *fileName, SM_FileHandle *fHandle){
   struct SM_FileHeader fileInfo;
   if (file){
     fread(&fileInfo, sizeof(SM_FileHeader), 1, file);
+    if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
     fHandle->fileName = fileName;
     fHandle->totalNumPages = fileInfo.totalNumPages;
     fHandle->curPagePos = fileInfo.curPagePos;
@@ -134,6 +135,7 @@ RC openPageFile (char *fileName, SM_FileHandle *fHandle){
 **************************************************************************************************/
 RC closePageFile (SM_FileHandle *fHandle){
   fclose(fHandle->mgmtInfo);
+  if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
   return RC_OK;
 };
 
@@ -161,6 +163,7 @@ RC closePageFile (SM_FileHandle *fHandle){
 **************************************************************************************************/
 RC destroyPageFile (char *fileName){
   remove(fileName);
+  if(errno != 0) return RC_FILE_NOT_FOUND;
   return RC_OK;
 };
 
@@ -192,7 +195,9 @@ RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
   if(pageNum < 0 || pageNum >= fHandle->totalNumPages)
     return RC_READ_NON_EXISTING_PAGE;
   fseek(fHandle->mgmtInfo, sizeof(SM_FileHeader)+pageNum*PAGE_SIZE, SEEK_SET);
+  if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
   fread(memPage, PAGE_SIZE, 1, fHandle->mgmtInfo);
+  if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
   updateCurrentInformation(fHandle->totalNumPages, pageNum, fHandle);
   return RC_OK;
 };
@@ -220,7 +225,9 @@ RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
  *                                                                  add comments.
 **************************************************************************************************/
 int getBlockPos (SM_FileHandle *fHandle){
-  return fHandle->curPagePos;
+  if(fHandle)
+    return fHandle->curPagePos;
+  else return RC_FILE_HANDLE_NOT_INIT;
 };
 
 /**************************************************************************************************
@@ -386,7 +393,9 @@ RC writeBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage){
   if(pageNum < 0 || pageNum >= fHandle->totalNumPages)
     return RC_READ_NON_EXISTING_PAGE;
   fseek(fHandle->mgmtInfo, sizeof(SM_FileHeader)+pageNum*PAGE_SIZE, SEEK_SET);
+  if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
   fwrite(memPage, PAGE_SIZE, 1, fHandle->mgmtInfo);
+  if(errno != 0) return RC_WRITE_FAILED;
   return RC_OK;
 };
 
@@ -442,13 +451,20 @@ RC writeCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage){
 RC appendEmptyBlock (SM_FileHandle *fHandle){
   fclose(fHandle->mgmtInfo);
   FILE *file = fopen(fHandle->fileName, "a");
-  char eof = '\0';
-  for(int i = 0; i < PAGE_SIZE; i++)
-    fwrite(&eof, sizeof(eof), 1, file);
-  fclose(file);
-  openPageFile(fHandle->fileName, fHandle);
-  updateCurrentInformation(fHandle->totalNumPages+1, fHandle->curPagePos, fHandle);
-  return RC_OK;
+  if(file){
+    char eof = '\0';
+    for(int i = 0; i < PAGE_SIZE; i++){
+      fwrite(&eof, sizeof(eof), 1, file);
+      if(errno != 0) return RC_WRITE_FAILED;
+    }
+    fclose(file);
+    if(errno != 0) return RC_WRITE_FAILED;
+    openPageFile(fHandle->fileName, fHandle);
+    updateCurrentInformation(fHandle->totalNumPages+1, fHandle->curPagePos, fHandle);
+    return RC_OK;
+  }else{
+    return RC_FILE_NOT_FOUND;
+  }
 };
 
 /**************************************************************************************************
@@ -477,8 +493,11 @@ RC appendEmptyBlock (SM_FileHandle *fHandle){
 RC ensureCapacity (int numberOfPages, SM_FileHandle *fHandle){
   int numberToEnsure = numberOfPages - fHandle->totalNumPages;
   if(numberToEnsure > 0){
-    for(int i = 0; i < numberToEnsure; i++)
-      appendEmptyBlock(fHandle);
+    for(int i = 0; i < numberToEnsure; i++){
+      if(appendEmptyBlock(fHandle) != RC_OK)
+        return res;
+    }
+
   }
   return RC_OK;
 };
@@ -515,6 +534,7 @@ RC updateCurrentInformation(int totalNumPages, int curPagePos, SM_FileHandle *fH
   fileInfo.totalNumPages = fHandle->totalNumPages;
   fileInfo.curPagePos = fHandle->curPagePos;
   fseek(fHandle->mgmtInfo, 0, SEEK_SET);
+  if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
   fwrite(&fileInfo, sizeof(fileInfo), 1, fHandle->mgmtInfo);
   if(errno != 0) return RC_WRITE_FAILED;
   return RC_OK;
