@@ -52,7 +52,9 @@ This "Makefile" is prepared to compile all files belonged to the Store Manager.
 
 test_assign1_2.c must be compiled separately (it has another main function) by the next command:
 
-	$ gcc test_assign1_2.c storage_mgr.c dberror.c -o test_assign1_2
+	$ make test_assign1_2
+
+A clean instruction has been added to Makefile, it remmoves all .o and executable files.
 
 +--------------------------------------------------------------+
 	5.Function descriptions
