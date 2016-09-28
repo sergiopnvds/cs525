@@ -48,7 +48,7 @@ To compile our code we will use the "Makelfile" provided.
 The procedure will be to open a terminal window and compile the code excuting the "Makefile" using:
 
 	$ make.
-	
+
 This "Makefile" is prepared to compile all files belonged to the Store Manager.
 
 test_assign1_2.c must be compiled separately (it has another main function) by the next command:
@@ -200,4 +200,6 @@ Additoinally, we include an extra file called "test_assign1_2.c" that include so
 +--------------------------------------------------------------+
 10.Problems to be solved
 +--------------------------------------------------------------+
+
+None
 
