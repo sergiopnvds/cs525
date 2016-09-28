@@ -4,7 +4,7 @@
 ################################################################
 
 +--------------------------------------------------------------+
-1.Personal information
+	1.Personal information
 +--------------------------------------------------------------+
 Name: Sergio Penavades Suarez
 CWID: A20387929
@@ -21,7 +21,7 @@ Email: jcarmonalopez@hawk.iit.edu
 Leader name: Victor Jose Portals 
 
 +--------------------------------------------------------------+
-2.File list
+	2.File list
 +--------------------------------------------------------------+
 Makefile
 Readme.txt
@@ -35,12 +35,12 @@ test_assign1_2.c
 test_helper.h
 
 +--------------------------------------------------------------+
-3.Milestone 
+	3.Milestone 
 +--------------------------------------------------------------+
 Store manager first functional version.
 
 +--------------------------------------------------------------+
-4.Installation instruction
+	4.Installation instruction
 +--------------------------------------------------------------+
 To compile our code we will use the "Makelfile" provided.
 
@@ -55,7 +55,7 @@ test_assign1_2.c must be compiled separately (it has another main function) by t
 	$ gcc test_assign1_2.c storage_mgr.c dberror.c -o test_assign1_2
 
 +--------------------------------------------------------------+
-5.Function descriptions
+	5.Function descriptions
 +--------------------------------------------------------------+
 
 #initStoreManager:
@@ -162,7 +162,7 @@ test_assign1_2.c must be compiled separately (it has another main function) by t
 
 
 +--------------------------------------------------------------+
-6.Data structure
+	6.Data structure
 +--------------------------------------------------------------+
 
 In case of this store manager the information will be stored in a file which is splitted in pages. This pages length is 4096 bytes. 
@@ -170,12 +170,12 @@ In case of this store manager the information will be stored in a file which is 
 Additonally, the information will be read and stored page per page.
 
 +--------------------------------------------------------------+
-7.Extra credit
+	7.Extra credit
 +--------------------------------------------------------------+
 As the techer assistant told as, the extra credit will be given if additional tests are implemented. Because of that, in the next section we describe the test added to the store manager code.
 
 +--------------------------------------------------------------+
-8.Test cases
+	8.Test cases
 +--------------------------------------------------------------+
 Additoinally, we include an extra file called "test_assign1_2.c" that include some extra test to chaeck and validity so more thoroughly the store manager coded. "test_assign1_2.c" contains the following thext cases.
 
@@ -187,7 +187,7 @@ Additoinally, we include an extra file called "test_assign1_2.c" that include so
 	#Test testWriteReadBlock: test every read and write operations
 
 +--------------------------------------------------------------+
-9.Problems solved
+	9.Problems solved
 +--------------------------------------------------------------+
 
 # Append empty blocks to the file. We had to close current file and open in append mode. After this, we had to reopen the file in r+ mode.
@@ -197,7 +197,7 @@ Additoinally, we include an extra file called "test_assign1_2.c" that include so
 # Persistent metadata information. We have created a struct that will be store at the start of the file. The program will need this information the next time it opens the file.
 
 +--------------------------------------------------------------+
-10.Problems to be solved
+	10.Problems to be solved
 +--------------------------------------------------------------+
 
 None
