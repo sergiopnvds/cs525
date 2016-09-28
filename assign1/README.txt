@@ -179,6 +179,11 @@ Additoinally, we include an extra file called "test_assign1_2.c" that include so
 9.Problems solved
 +--------------------------------------------------------------+
 
+# Append empty blocks to the file. We had to close current file and open in append mode. After this, we had to reopen the file in r+ mode.
+
+# Read/Write in an absolute position. We have used fseek function to accomplish this purpose.
+
+# Persistent metadata information. We have created a struct that will be store at the start of the file. The program will need this information the next time it opens the file.
 
 +--------------------------------------------------------------+
 10.Problems to be solved
