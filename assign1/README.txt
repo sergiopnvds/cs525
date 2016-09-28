@@ -166,15 +166,14 @@ As the techer assistant told as, the extra credit will be given if additional te
 +--------------------------------------------------------------+
 8.Test cases
 +--------------------------------------------------------------+
-Additoinally, we include an extra file called "test_assign1_2.c" that include some extra test to chaeck and validity so more thoroughly the store manager coded. "" contains the following thext cases.
+Additoinally, we include an extra file called "test_assign1_2.c" that include some extra test to chaeck and validity so more thoroughly the store manager coded. "test_assign1_2.c" contains the following thext cases.
 
-	#Test 1:
+	#Test testCreateOpenClose: Checks if create, open and close returns error codes correctly.
 
-	#Test 2:
+	#Test testAppendEmptyBlockEnsureCapacity: Checks if appendEmptyBlock and ensureCapacity 
+		functions works as expected.
 	
-	#Test 3:
-	
-	#Test 4:
+	#Test testWriteReadBlock: test every read and write operations
 
 +--------------------------------------------------------------+
 9.Problems solved
