@@ -61,9 +61,9 @@ RC createPageFile (char *fileName){
       fclose(file);
       return RC_WRITE_FAILED;
     }
-
+    int i;
     // We writes the first page full of '\0'
-    for (int i = 0; i < PAGE_SIZE; ++i){
+    for (i = 0; i < PAGE_SIZE; ++i){
       errno = 0;
       fwrite(&eof, sizeof(eof), 1, file);
       if(errno != 0){
@@ -157,10 +157,12 @@ RC openPageFile (char *fileName, SM_FileHandle *fHandle){
  *                                                                  add comments.
 **************************************************************************************************/
 RC closePageFile (SM_FileHandle *fHandle){
-  errno = 0;
-  fclose(fHandle->mgmtInfo);
-  if(errno != 0) return RC_FILE_HANDLE_NOT_INIT;
-  return RC_OK;
+  if(fHandle){
+    fclose(fHandle->mgmtInfo);
+    return RC_OK;
+  }else{
+    return RC_FILE_HANDLE_NOT_INIT;
+  }
 };
 
 /**************************************************************************************************
@@ -515,8 +517,9 @@ RC appendEmptyBlock (SM_FileHandle *fHandle){
   if(file){
 
     char eof = '\0';
+    int i;
     // we append a new page full of '\0' character
-    for(int i = 0; i < PAGE_SIZE; i++){
+    for(i = 0; i < PAGE_SIZE; i++){
       errno = 0;
       fwrite(&eof, sizeof(eof), 1, file);
       if(errno != 0) return RC_WRITE_FAILED;
@@ -565,7 +568,8 @@ RC ensureCapacity (int numberOfPages, SM_FileHandle *fHandle){
   int numberToEnsure = numberOfPages - fHandle->totalNumPages;
   // if the number is negative or 0, we dont need to append any page
   if(numberToEnsure > 0){
-    for(int i = 0; i < numberToEnsure; i++){
+    int i;
+    for(i = 0; i < numberToEnsure; i++){
       RC res = appendEmptyBlock(fHandle);
       if(res != RC_OK) return res;
     }
