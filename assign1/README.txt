@@ -45,7 +45,13 @@ Store manager first functional version.
 +--------------------------------------------------------------+
 To compile our code we will use the "Makelfile" provided.
 
-The procedure will be to open a terminal window and compile the code excuting the "Makefile" using $make. This "Makefile" is prepared to compile all files belonged to the Store Manager.
+The procedure will be to open a terminal window and compile the code excuting the "Makefile" using:
+	$ make.
+This "Makefile" is prepared to compile all files belonged to the Store Manager.
+
+test_assign1_2.c must be compiled separately (it has another main function) by the next command:
+
+	$ gcc test_assign1_2.c storage_mgr.c dberror.c -o test_assign1_2
 
 +--------------------------------------------------------------+
 5.Function descriptions
@@ -157,6 +163,10 @@ The procedure will be to open a terminal window and compile the code excuting th
 +--------------------------------------------------------------+
 6.Data structure
 +--------------------------------------------------------------+
+
+In case of this store manager the information will be stored in a file which is splitted in pages. This pages length is 4096 bytes. 
+
+Additonally, the information will be read and stored page per page.
 
 +--------------------------------------------------------------+
 7.Extra credit
