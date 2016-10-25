@@ -3,6 +3,7 @@
 
 // Include return codes and methods for logging errors
 #include "dberror.h"
+#include "storage_mgr.h"
 
 // Include bool DT
 #include "dt.h"
@@ -33,6 +34,24 @@ typedef struct BM_PageHandle {
   char *data;
 } BM_PageHandle;
 
+// STRUCTURES ADDED IN ASSIGNMENT 2
+typedef struct BM_Mgmtdata{
+  int numReadIO;
+  int numWriteIO;
+  SM_FileHandle fileHandle;
+  void* buffer;
+} BM_Mgmtdata;
+
+typedef struct BM_Buffer{
+  SM_PageHandle* frameBuffer;
+  int *pageIndex;
+  int *fixCount;
+  bool *dirtyFlags;
+  int insertPos;
+  long *lastUseTime;
+  int timeCounter;
+} BM_Buffer;
+
 // convenience macros
 #define MAKE_POOL()					\
   ((BM_BufferPool *) malloc (sizeof(BM_BufferPool)))
@@ -60,5 +79,9 @@ bool *getDirtyFlags (BM_BufferPool *const bm);
 int *getFixCounts (BM_BufferPool *const bm);
 int getNumReadIO (BM_BufferPool *const bm);
 int getNumWriteIO (BM_BufferPool *const bm);
+
+//Added functions ASSIGNMENT 2
+int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex);
+int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages);
 
 #endif
