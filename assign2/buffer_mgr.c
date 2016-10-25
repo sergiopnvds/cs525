@@ -8,6 +8,29 @@
 #include <string.h>
 #include <unistd.h>
 
+/**************************************************************************************************
+ * Function Name: initBufferPool
+ * Description:
+ *    Create a buffer pool and initializes its management data
+ *
+ * Parameters:
+ *    BM_BufferPool *const bm
+ *		const char *const pageFileName
+ * 		const int numPages
+ *		ReplacementStrategy strategy
+ *		oid *stratData
+ *
+ * Return:
+ *    RC: returned code
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const int numPages, ReplacementStrategy strategy, void *stratData){
 	SM_FileHandle fileHandle;
 	char *pageFileName2 = strdup(pageFileName); // Avoid 'discard const' warning.
@@ -51,12 +74,51 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 		bm->mgmtData = mgmtData;
 		return RC_OK;
 	}
-};
+}
+
+/**************************************************************************************************
+ * Function Name: shutdownBufferPool
+ * Description:
+ *    Destroy buffer pool
+ *
+ * Parameters:
+ *    BM_BufferPool *const bm
+ *
+ * Return:
+ *    RC: returned code
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 RC shutdownBufferPool(BM_BufferPool *const bm){
 	// Forces all dirty pages to be writed in disk
 	return forceFlushPool(bm);
-};
+}
 
+/**************************************************************************************************
+ * Function Name: forceFlushPool
+ * Description:
+ *    Writes all pages marked as dirty to disk.
+ *
+ * Parameters:
+ *    BM_BufferPool *const bm
+ *
+ * Return:
+ *    RC: returned code
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 RC forceFlushPool(BM_BufferPool *const bm){
 	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -76,7 +138,26 @@ RC forceFlushPool(BM_BufferPool *const bm){
 	return RC_OK;
 }
 
-// Buffer Manager Interface Access Pages
+/**************************************************************************************************
+ * Function Name: markDirty
+ * Description:
+ *    Mark a page in buffer frame as dirty
+ *
+ * Parameters:
+ *    	BM_BufferPool *const bm
+ *		BM_PageHandle *const page
+ *
+ * Return:
+ *    RC: returned code
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page){
 	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -88,6 +169,26 @@ RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page){
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: unpinPage
+ * Description:
+ *      Remove pin between page frame and client.
+ *
+ * Parameters:
+ *    	BM_BufferPool *const bm
+ *		BM_PageHandle *const page
+ *
+ * Return:
+ *    RC: returned code
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page){
 	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -100,6 +201,26 @@ RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page){
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: forcePage
+ * Description:
+ *      Write page from buffer frame to file in disk.
+ *
+ * Parameters:
+ *    	BM_BufferPool *const bm
+ *		BM_PageHandle *const page
+ *
+ * Return:
+ *    RC: returned code
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page){
 	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -116,6 +237,27 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page){
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: pinPage
+ * Description:
+ *      Read page from disk if it is not already in buffer.
+ *
+ * Parameters:
+ *    	BM_BufferPool *const bm
+ *		BM_PageHandle *const page
+ * 		const PageNumber pageNum
+ *
+ * Return:
+ *    RC: returned code
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber pageNum){
 	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -176,7 +318,25 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 
 };
 
-// Statistics Interface
+/**************************************************************************************************
+ * Function Name: getFrameContents
+ * Description:
+ *      Returns an array of PageNumberswhere the ith element is the number of the page stored in the ith page frame.
+ *
+ * Parameters:
+ *    	BM_BufferPool *const bm
+ *
+ * Return:
+ *    PageNumber*: array of page numbers
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 PageNumber *getFrameContents (BM_BufferPool *const bm){
 	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -185,6 +345,25 @@ PageNumber *getFrameContents (BM_BufferPool *const bm){
 	return (PageNumber *)buffer->pageIndex;
 }
 
+/**************************************************************************************************
+ * Function Name: getDirtyFlags
+ * Description:
+ *      Returns an array of bools where the ith element is TRUE if the page stored in the ith page frame is dirty.
+ *
+ * Parameters:
+ *    	BM_BufferPool *const bm
+ *
+ * Return:
+ *    bool*: array of dirty flags
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 bool *getDirtyFlags (BM_BufferPool *const bm){
 	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -193,6 +372,25 @@ bool *getDirtyFlags (BM_BufferPool *const bm){
 	return buffer->dirtyFlags;
 }
 
+/**************************************************************************************************
+ * Function Name: getFixCounts
+ * Description:
+ *      Returns an array of ints where the ith element is the fix count of the page stored in the ith page frame.
+ *
+ * Parameters:
+ *    	BM_BufferPool *const bm
+ *
+ * Return:
+ *    int*: array of fix count.
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 int *getFixCounts (BM_BufferPool *const bm){
 	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -201,17 +399,77 @@ int *getFixCounts (BM_BufferPool *const bm){
 	return buffer->fixCount;
 }
 
+/**************************************************************************************************
+ * Function Name: getNumReadIO
+ * Description:
+ *      Returns the number of pages that have been read from disk since a buffer pool has been initialized.
+ *
+ * Parameters:
+ *    	BM_BufferPool *const bm
+ *
+ * Return:
+ *    int: count of read operations.
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 int getNumReadIO (BM_BufferPool *const bm){
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
 	// return out reading counter from buffer pool management data
 	return mgmtData->numReadIO;
-};
+}
+
+/**************************************************************************************************
+ * Function Name: getNumWriteIO
+ * Description:
+ *      Returns the number of pages that have been writed to disk since a buffer pool has been initialized.
+ *
+ * Parameters:
+ *    	BM_BufferPool *const bm
+ *
+ * Return:
+ *    int: count of write operations.
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 int getNumWriteIO (BM_BufferPool *const bm){
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
 	// return out reading counter from buffer pool management data
 	return mgmtData->numWriteIO;
-};
+}
 
+/**************************************************************************************************
+ * Function Name: findPageIndex
+ * Description:
+ *      Returns the index of a page inside frame buffer.
+ *
+ * Parameters:
+ *    	int numPage  
+ *		int totalPages
+ *		PageNumber *pageIndex
+ *
+ * Return:
+ *    int: index of page in frame buffer. -1 if is not in buffer.
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-15  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex){
 	PageNumber position = NO_PAGE;
 	for(int i = 0; i < totalPages && position < 0;i++){
@@ -222,6 +480,27 @@ int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex){
 	return position;
 }
 
+/**************************************************************************************************
+ * Function Name: searchInsertPosition
+ * Description:
+ *      Returns the insert position in a FIFO buffer discarding fixed.
+ *
+ * Parameters:
+ *    	int currentPos
+ *		int *fixCount
+ *		int totalPages
+ *
+ * Return:
+ *    int: index of frame in buffer to write page. Returns -1 if is not space available.
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-25  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 int searchInsertPosition(int currentPos, int *fixCount, int totalPages){
 	int insertPosition = -1;
 	for(int i = currentPos; (i < totalPages + currentPos && (insertPosition < 0)); i++){
@@ -230,6 +509,27 @@ int searchInsertPosition(int currentPos, int *fixCount, int totalPages){
 	return insertPosition;
 }
 
+/**************************************************************************************************
+ * Function Name: searchLowerTime
+ * Description:
+ *      Returns the insert position in a FIFO buffer discarding fixed.
+ *
+ * Parameters:
+ *    	long *lastUseTime
+ *		int *fixCount
+ *		int totalPages
+ *
+ * Return:
+ *    int: index of frame in buffer to write page. Returns -1 if is not space available.
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-24  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
 int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages){
 	int lowerIndex = 0;
 	for(int i = 1; i < totalPages; i++){
