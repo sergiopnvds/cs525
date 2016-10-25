@@ -10,38 +10,41 @@
 
 RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const int numPages, ReplacementStrategy strategy, void *stratData){
 	SM_FileHandle fileHandle;
-	char *pageFileName2 = strdup(pageFileName);
+	char *pageFileName2 = strdup(pageFileName); // Avoid 'discard const' warning.
 	if(openPageFile (pageFileName2, &fileHandle) == RC_FILE_NOT_FOUND) {
 		return RC_FILE_NOT_FOUND;
 	} else {
+		//Initializes buffer structure (defined in buffer_mgr.h)
 		BM_Buffer *buffer = malloc(sizeof(BM_Buffer));
-		SM_PageHandle *frameBuffer = malloc(PAGE_SIZE * numPages);//*
-		PageNumber *pageIndex = malloc(sizeof(int)*numPages);//*
-		bool *dirtyFlags = malloc(sizeof(bool)*numPages);//*
-		int *fixCount = malloc(sizeof(int)*numPages);//*
+		// Initializes buffer management arrays
+		SM_PageHandle *frameBuffer = malloc(PAGE_SIZE * numPages);
+		PageNumber *pageIndex = malloc(sizeof(int)*numPages);
+		bool *dirtyFlags = malloc(sizeof(bool)*numPages);
+		int *fixCount = malloc(sizeof(int)*numPages);
 		long *lastUseTime = malloc(sizeof(long)*numPages);
-
-		for(int i = 0; i < numPages;i++){//*
-			pageIndex[i] = NO_PAGE;//*
-			dirtyFlags[i] = FALSE;//*
-			fixCount[i] = 0;//*
+		// Gives starting values for each management array
+		for(int i = 0; i < numPages;i++){
+			pageIndex[i] = NO_PAGE;
+			dirtyFlags[i] = FALSE;
+			fixCount[i] = 0;
 			lastUseTime[i] = -1; 
 		}
-
-		buffer->frameBuffer = frameBuffer;//*
-		buffer->pageIndex = pageIndex;//*
-		buffer->dirtyFlags = dirtyFlags;//*
-		buffer->fixCount = fixCount;//*
+		// Save data in structure
+		buffer->frameBuffer = frameBuffer;
+		buffer->pageIndex = pageIndex;
+		buffer->dirtyFlags = dirtyFlags;
+		buffer->fixCount = fixCount;
 		buffer->insertPos = 0;
 		buffer->timeCounter = 0;
 		buffer->lastUseTime = lastUseTime;
 
+		// Save and initialize our aux buffer pool management data
 		BM_Mgmtdata *mgmtData = malloc(sizeof(BM_Mgmtdata));
 		mgmtData->fileHandle = fileHandle;
 		mgmtData->buffer = buffer;
 		mgmtData->numReadIO = 0;
 		mgmtData->numWriteIO = 0;
-		// Write BufferPool data and fifo buffer to mgmtData
+		// Save and initialize buffer pool management data for given structure
 		bm->pageFile = pageFileName2;
 		bm->numPages = numPages;
 		bm->strategy = strategy;
