@@ -35,21 +35,22 @@ typedef struct BM_PageHandle {
 } BM_PageHandle;
 
 // STRUCTURES ADDED IN ASSIGNMENT 2
+// Structure with data for buffer management
 typedef struct BM_Mgmtdata{
-  int numReadIO;
-  int numWriteIO;
-  SM_FileHandle fileHandle;
-  void* buffer;
+  int numReadIO; // File reading counter
+  int numWriteIO; //File writing counter
+  SM_FileHandle fileHandle; // File handler related with buffer
+  void* buffer; // Buffer structure.
 } BM_Mgmtdata;
-
+//Structure with buffer data
 typedef struct BM_Buffer{
-  SM_PageHandle* frameBuffer;
-  int *pageIndex;
-  int *fixCount;
-  bool *dirtyFlags;
-  int insertPos;
-  long *lastUseTime;
-  int timeCounter;
+  SM_PageHandle* frameBuffer; // Buffer array
+  int *pageIndex; // Array relating buffer position and page number
+  int *fixCount; // Array relating buffer position and number of page fixes
+  bool *dirtyFlags; // Array relating buffer position and marked dirty flags
+  int insertPos; // Insertion position for FIFO buffer
+  long *lastUseTime; // Array relating buffer position and last use time
+  int timeCounter; // Time counter to update *lastUseTime. Increase each pinPage.
 } BM_Buffer;
 
 // convenience macros
