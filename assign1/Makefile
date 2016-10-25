@@ -8,7 +8,7 @@ DEPS = dberror.h storage_mgr.h test_helper.h
 test_assign1_1: test_assign1_1.o storage_mgr.o dberror.o 
 	$(CC) -o $@ $^ -I.	
  
-test_assign1_2: test_assign1_1.o storage_mgr.o dberror.o 
+test_assign1_2: test_assign1_2.o storage_mgr.o dberror.o 
 	$(CC) -o $@ $^ -I.	
 
 clean:
