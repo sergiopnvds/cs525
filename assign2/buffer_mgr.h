@@ -44,7 +44,7 @@ typedef struct BM_Mgmtdata{
 } BM_Mgmtdata;
 //Structure with buffer management data
 typedef struct BM_Buffer{
-  SM_PageHandle* frameBuffer; // Buffer array
+  SM_PageHandle* frameBuffer; // Buffer array with frames
   int *pageIndex; // Array relating buffer position and page number
   int *fixCount; // Array relating buffer position and number of page fixes
   bool *dirtyFlags; // Array relating buffer position and marked dirty flags
@@ -83,6 +83,7 @@ int getNumWriteIO (BM_BufferPool *const bm);
 
 //Added functions ASSIGNMENT 2
 int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex);
+int searchInsertPosition(int currentPos, int *fixCount, int totalPages);
 int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages);
 
 #endif
