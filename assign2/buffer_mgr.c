@@ -79,7 +79,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 /**************************************************************************************************
  * Function Name: shutdownBufferPool
  * Description:
- *    Destroy buffer pool
+ *    Destroy buffer pool and free resources.
  *
  * Parameters:
  *    BM_BufferPool *const bm
@@ -512,7 +512,7 @@ int searchInsertPosition(int currentPos, int *fixCount, int totalPages){
 /**************************************************************************************************
  * Function Name: searchLowerTime
  * Description:
- *      Returns the insert position in a FIFO buffer discarding fixed.
+ *      Returns the insert position in a LRU buffer discarding fixed.
  *
  * Parameters:
  *    	long *lastUseTime

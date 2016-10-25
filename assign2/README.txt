@@ -67,67 +67,63 @@ A clean instruction has been added to Makefile, it remmoves all .o and executabl
 
 #initBufferPool:
 
-	Funcion description here.
-
-#initBufferPool:
-	
-	Function description here.
+	Create a buffer pool and initializes its management data.
 
 #shutdownBufferPool:
 	
-	Function description here.
+	Destroy buffer pool and free resources.
 
 #forceFlushPool:
 	
-	Function description here.
+	Writes all pages marked as dirty to disk.
 
 #markDirty:
 	
-	Function description here.
+	Mark a page in buffer frame as dirty.
 
 #unpinPage:
 	
-	Function description here.
+	Remove pin between page frame and client.
 
 #forcePage:
 	
-	Function description here.
+	Write page from buffer frame to file in disk.
 
 #pinPage:
 	
-	Function description here.
+	Read page from disk if it is not already in buffer.
 
 #getFrameContents:
 	
-	Function description here.
+	Returns an array of PageNumberswhere the ith element is the number of the page stored in the ith page frame.
 
 #getDirtyFlags:
 	
-	Function description here.
+	Returns an array of bools where the ith element is TRUE if the page stored in the ith page frame is dirty.
 
 #getFixCounts:
 	
-	Function description here.
+	Returns an array of ints where the ith element is the fix count of the page stored in the ith page frame.
 
 #getNumReadIO:
 	
-	Function description here.
+	Returns the number of pages that have been read from disk since a buffer pool has been initialized.
 
 #getNumWriteIO:
 	
-	Function description here.
+	Returns the number of pages that have been writed to disk since a buffer pool has been initialized.
 
 #findPageIndex:
 	
-	Function description here.
+	Returns the index of a page inside frame buffer.
 
 #searchInsertPosition:
 	
-	Function description here.
+	Returns the insert position in a FIFO buffer discarding fixed.
 
 #searchLowerTime:
 	
-	Function description here.
+	Returns the insert position in a LRU buffer discarding fixed.
 
 
 
