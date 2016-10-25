@@ -1,6 +1,6 @@
 
 ################################################################
-	CS525 HOMEWORK 1
+	CS525 ASSIGNMENT 2 - BUFFER MANAGER
 ################################################################
 
 +--------------------------------------------------------------+
@@ -23,16 +23,23 @@ Leader name: Victor Jose Portals
 +--------------------------------------------------------------+
 	2.File list
 +--------------------------------------------------------------+
-Makefile
-Readme.txt
-_DS_Store
+buffer_mgr.c
+buffer_mgr.h
+buffer_mgr_stat.c
+buffer_mgr_stat.h
 dberror.c
 dberror.h
+_DS_Store
+dt.h
+Makefile
+README.txt
 storage_mgr.c
 storage_mgr.h
 test_assign1_1.c
 test_assign1_2.c
+test_assign2_1.c
 test_helper.h
+
 
 +--------------------------------------------------------------+
 	3.Milestone 
@@ -46,130 +53,94 @@ To compile our code we will use the "Makelfile" provided.
 
 The procedure will be to open a terminal window and compile the code excuting the "Makefile" using:
 
-	$ make.
+	$ make
 
-This "Makefile" is prepared to compile all files belonged to the Store Manager.
+This "Makefile" is prepared to compile all files belonged to the Buffer Manager and provide test_assign2_1 executable file.
 
-test_assign1_2.c must be compiled separately (it has another main function) by the next command:
+A clean instruction has been added to Makefile, it remmoves all .o and executable files:
 
-	$ make test_assign1_2
-
-A clean instruction has been added to Makefile, it remmoves all .o and executable files.
+	$ make clean
 
 +--------------------------------------------------------------+
 	5.Function descriptions
 +--------------------------------------------------------------+
 
-#initStoreManager:
+#initBufferPool:
 
-	Funcion used to initilize the Store manager
+	Funcion description here.
 
-#createPageFile:
-
-	This function creates a new page file. It receives the name of the file and creates the file with one page and fill the page with zeros ('\0').
-
-	Among C own functions we need for codding "createPageFile" are fopen(), fwrite() and fclose() to create, write and close the file. Additionally it returns corresponding write error and file handle error if no file exists.
-
-#openPageFile:
-
-	Function "openPageFile" open a whole page file that already exits from disk. It receives the file name to open and a existing file handle. If the page file exists and it is opened successfully we add the data of the file in the data handle. Furthermore, if the file does not exist, it returs a file not found error.
-
-	In this case we use fopen() and fread() C functions, use "->" for adding values to the handle struct and return the RCs.
-
-#closePageFile:
-
-	It Closes an open page file. It receives the metaData (fileHandle) and using the function fclose() with the fhandle values, it closes the file. It will return an ok RC if the file was closed correctly and a file handle error if there is an error.
-
-#destroyPageFile:
-
-	It destroyes an open page file. It receives the file name and using the function remove(), it drestroys the file. It will return an ok RC if the file was destroyed correctly and a file not found error if it does not find a file with the name provided.
-
-#readBlock:
-
-	This function reads the number page block from a file provided and stores it in memory.
-
-	It receives the index of the page(pageNum), the file handle(fHandle) and where the data will be stored(memPage). Besides, this function uses fseek(), fread(), and the auxiliar function "updateCurrentInformation". This auxiliar function updates the file metadata.
-
-	If the file has not have the number of pages required, the program will return a non existing page error. Also, if the file has not been opened, it will return a handle not init error.
-
-#getBlockPos:
-
-	It returns the current page positin in the file, using the metadata raceived in the handle. If there is not a handle it returns a handle not init error.
-
-#readFirstBlock:
-
-	It reads the first page in the file. It receives the metadata(fHandle) and the variable where to save the page(memPage). It uses the function "readBlock" described above.
-
-#readLastBlock:
-
-	It reads the last page in the file. It receives the metadata(fHandle) and the variable where to save the page(memPage). It uses the function "readBlock" described above.
-
-#readPreviousBlock:
-
-	It reads the previous page in the file. It receives the metadata(fHandle) and the variable where to save the page(memPage). It uses the function "readBlock" described above. 
-
-	Note: The metadata includes the information about in which page we are an the moment.
-
-#readCurrentBlock:
+#initBufferPool:
 	
-	It reads the current page in the file. It receives the metadata(fHandle) and the variable where to save the page(memPage). It uses the function "readBlock" described above.
+	Function description here.
 
-	Note: The metadata includes the information about in which page we are an the moment.
+#shutdownBufferPool:
+	
+	Function description here.
 
-#readNextBlock:
+#forceFlushPool:
+	
+	Function description here.
 
-	It reads the next page in the file. It receives the metadata(fHandle) and the variable where to save the page(memPage). It uses the function "readBlock" described above.
+#markDirty:
+	
+	Function description here.
 
-	Note: The metadata includes the information about in which page we are an the moment.
+#unpinPage:
+	
+	Function description here.
 
-#writeBlock:
+#forcePage:
+	
+	Function description here.
 
-	This function writes the current page block from a file provided and stores it in memory.
+#pinPage:
+	
+	Function description here.
 
-	It receives the index of the page(pageNum), the file handle(fHandle) and where the data is actually (memPage). Besides, this function uses fseek() and fwrite().
+#getFrameContents:
+	
+	Function description here.
 
-	If the file has not have the number of pages required, the program will return a non existing page error. Also, if there is an error in using the file it will return a handle not init error. And if there is an error writing the file it will return a write error.
+#getDirtyFlags:
+	
+	Function description here.
 
-#writeCurrentBlock:
+#getFixCounts:
+	
+	Function description here.
 
-	This function writes page block in an absolute position from a file provided and stores it in memory.
+#getNumReadIO:
+	
+	Function description here.
 
-	It receives the index of the page(pageNum), the file handle(fHandle) and where the data is actually (memPage). Besides, this function uses fseek() and fwrite().Additionally it calls the functino "writeBlock".
+#getNumWriteIO:
+	
+	Function description here.
 
-	If the file has not have the number of pages required, the program will return a non existing page error. Also, if there is an error in using the file it will return a handle not init error. And if there is an error writing the file it will return a write error.
+#findPageIndex:
+	
+	Function description here.
 
-#appendEmptyBlock:
+#searchInsertPosition:
+	
+	Function description here.
 
-	It ncreases by one the number of pages in the file and this new page has to be itialized whit all zeros.
+#searchLowerTime:
+	
+	Function description here.
 
-	It receives thefile metadata and uses the C funcions fclose() and fwrite(), the Store manaager funtion "openPageFile" and the auxiliar function "updateCurrentInformation".
 
-	It will return ok in case of complete the whole function, a write failed error in case of if there are problems writing and closing the file, and a file not found error if there is not a file with the name provided by the metadata.
 
-#EnsureCapacity:
-
-	If the file has less than numberOfPages pages this function increases the size to numberOfPages value received. Additionally, this function receives the file metadata.
-
-	Besides, it uses the function "appendEmptyBlock" datailed above. If the funtion finish correctly, it returns ok.
-
-#UpdateCurrentInformation:
-
-	This is a axiliary function which updates the handle struct and writes the metadata at the start of the file.
-
-	It receives de total number of pages (totalNumPages), the current page position(curPagePos) and the file metadata (fHandle). 
-
-	Furthermore, it uses C functions like fseek() and fwrite() to modify and move through the file.
-
-	It will return ok in case of complete the whole function, a write failed error in case of if there are problems writing and closing the file, and a handle not not error if there is a problem with the metadata provided during fseek() execution.
 
 
 +--------------------------------------------------------------+
 	6.Data structure
 +--------------------------------------------------------------+
+BM_BufferPool
 
-In case of this store manager the information will be stored in a file which is splitted in pages. This pages length is 4096 bytes. 
+BM_Buffer
 
-Additonally, the information will be read and stored page per page.
+BM_ManagementData
 
 +--------------------------------------------------------------+
 	7.Extra credit
@@ -192,12 +163,9 @@ Additoinally, we include an extra file called "test_assign1_2.c" that include so
 	9.Problems solved
 +--------------------------------------------------------------+
 
-# Append empty blocks to the file. We had to close current file and open in append mode. After this, we had to reopen the file in r+ mode.
+# Problem description here
 
-# Read/Write in an absolute position. We have used fseek function to accomplish this purpose.
-
-# Persistent metadata information. We have created a struct that will be store at the start of the file. The program will need this information the next time it opens the file.
-
+# Problem description here
 
 +--------------------------------------------------------------+
 	10.Problems to be solved
