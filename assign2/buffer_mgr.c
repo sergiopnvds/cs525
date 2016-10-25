@@ -53,17 +53,23 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 	}
 };
 RC shutdownBufferPool(BM_BufferPool *const bm){
+	// Forces all dirty pages to be writed in disk
 	return forceFlushPool(bm);
 };
 
 RC forceFlushPool(BM_BufferPool *const bm){
+	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
-	BM_Buffer *LRUBuffer = mgmtData->buffer;
+	BM_Buffer *buffer = mgmtData->buffer;
+	// Checks what frames in buffer are marked as dirty
 	for(int i=0;i < bm->numPages;i++){
-		if(LRUBuffer->dirtyFlags[i] == TRUE){
-			int err = writeBlock (LRUBuffer->pageIndex[i], &mgmtData->fileHandle, LRUBuffer->frameBuffer[i]);
+		if(buffer->dirtyFlags[i] == TRUE){
+			// and writes them to disk.
+			int err = writeBlock (buffer->pageIndex[i], &mgmtData->fileHandle, buffer->frameBuffer[i]);
 			if(err != RC_OK) return err;
-			LRUBuffer->dirtyFlags[i] = FALSE;
+			// setting flag to false
+			buffer->dirtyFlags[i] = FALSE;
+			// and increasing writing count
 			mgmtData->numWriteIO++;
 		}
 	}
@@ -72,66 +78,84 @@ RC forceFlushPool(BM_BufferPool *const bm){
 
 // Buffer Manager Interface Access Pages
 RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page){
+	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
-	BM_Buffer *LRUBuffer = mgmtData->buffer;
-	int index = findPageIndex(page->pageNum, bm->numPages,LRUBuffer->pageIndex);
-	LRUBuffer->dirtyFlags[index] = TRUE;
+	BM_Buffer *buffer = mgmtData->buffer;
+	//Search page position in buffer
+	int index = findPageIndex(page->pageNum, bm->numPages,buffer->pageIndex);
+	// and sets its flag to true
+	buffer->dirtyFlags[index] = TRUE;
 	return RC_OK;
 }
 
 RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page){
+	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
 	BM_Buffer *fifoBuffer = mgmtData->buffer;
-
+	//Search page position in buffer
 	int index = findPageIndex(page->pageNum, bm->numPages,fifoBuffer->pageIndex);
+	// And decrease fix count
 	if(index != NO_PAGE) fifoBuffer->fixCount[index]--;
 
 	return RC_OK;
 }
 
 RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page){
+	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
-	BM_Buffer *LRUBuffer = mgmtData->buffer;
-	int index = findPageIndex(page->pageNum, bm->numPages,LRUBuffer->pageIndex);
-	int err = writeBlock (page->pageNum, &mgmtData->fileHandle, LRUBuffer->frameBuffer[index]);
+	BM_Buffer *buffer = mgmtData->buffer;
+	//Search page position in buffer
+	int index = findPageIndex(page->pageNum, bm->numPages,buffer->pageIndex);
+	// Writes it to disk
+	int err = writeBlock (page->pageNum, &mgmtData->fileHandle, buffer->frameBuffer[index]);
 	if(err != RC_OK) return err;
+	// increases writing count
 	mgmtData->numWriteIO++;
-	LRUBuffer->dirtyFlags[index] = FALSE;
+	// and sets dirty flag to true 
+	buffer->dirtyFlags[index] = FALSE;
 	return RC_OK;
 }
 
 RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber pageNum){
+	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
 	BM_Buffer *buffer = mgmtData->buffer;
-
+	//Search page position in buffer
 	int index = findPageIndex(pageNum, bm->numPages,buffer->pageIndex);
 	if(index == NO_PAGE){
+		// If it is not already in buffer
 		int insertionIndex = -1;
+		// Look for insert position according to replacement strategy.
+		// Discarding if frame is being used.
 		if(bm->strategy == RS_LRU){
 			insertionIndex = searchLowerTime(buffer->lastUseTime, buffer->fixCount, bm->numPages);
-			if(insertionIndex < 0) return RC_OK;
 		}else if(bm->strategy == RS_FIFO){
-			insertionIndex = buffer->insertPos;
-			if(buffer->fixCount[insertionIndex] > 0){
-				buffer->insertPos = (insertionIndex + 1)%bm->numPages;
-				return pinPage(bm, page, pageNum);
-			}
+			insertionIndex = searchInsertPosition(buffer->insertPos,buffer->fixCount, bm->numPages);
 		}
+		if(insertionIndex < 0) return RC_OK; // DEFINE NEW CODE FOR THIS?
+
+		// If page to be replace is marked as dirty 
 		if(buffer->dirtyFlags[insertionIndex] == TRUE){
 			int err = writeBlock (buffer->pageIndex[insertionIndex], &mgmtData->fileHandle, buffer->frameBuffer[insertionIndex]);
 			if(err != RC_OK) return err;
 			mgmtData->numWriteIO++;
 		}
+		// If trying to read a page that is not in file yet
 		if((mgmtData->fileHandle).totalNumPages <=  pageNum){
+			// extends capacity of file to allocate it.
 			ensureCapacity(pageNum + 1, &mgmtData->fileHandle);
 		}
+		// Read block from file
 		SM_PageHandle memPage = malloc(PAGE_SIZE);
 		RC code = readBlock (pageNum, &mgmtData->fileHandle, memPage);
 		if(code != RC_OK) return code;
+		// Increases reading counter
 		mgmtData->numReadIO++;
+		// Save read page data in BM_PageHandle structure
 		page->pageNum = pageNum;
 		page->data = memPage;
 
+		// Inserts page in buffer frames and updates management data
 		buffer->frameBuffer[insertionIndex] = page->data;
 		buffer->pageIndex[insertionIndex] = page->pageNum;
 		buffer->dirtyFlags[insertionIndex] = FALSE;
@@ -139,9 +163,13 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		buffer->insertPos = (insertionIndex + 1)%bm->numPages;
 		buffer->lastUseTime[insertionIndex] = buffer->timeCounter++;
 	}else{
+		// If it is already in buffer
+		// Save read page data in BM_PageHandle structure
 		page->pageNum = pageNum;
 		page->data = buffer->frameBuffer[index];
+		// Increases fix count for this frame in buffer
 		buffer->fixCount[index]++;
+		// If replacement strategy is LRU, updates time counter.
 		if(bm->strategy == RS_LRU) buffer->lastUseTime[index] = buffer->timeCounter++;
 	}
 	return RC_OK;
@@ -150,29 +178,37 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 
 // Statistics Interface
 PageNumber *getFrameContents (BM_BufferPool *const bm){
+	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
-	BM_Buffer *LRUBuffer = mgmtData->buffer;
-	return (PageNumber *)LRUBuffer->pageIndex;
+	BM_Buffer *buffer = mgmtData->buffer;
+	// return our pageIndex from buffer 
+	return (PageNumber *)buffer->pageIndex;
 }
 
 bool *getDirtyFlags (BM_BufferPool *const bm){
+	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
-	BM_Buffer *LRUBuffer = mgmtData->buffer;
-	return LRUBuffer->dirtyFlags;
+	BM_Buffer *buffer = mgmtData->buffer;
+	// return our dirtyFlags from buffer 
+	return buffer->dirtyFlags;
 }
 
 int *getFixCounts (BM_BufferPool *const bm){
+	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
-	BM_Buffer *LRUBuffer = mgmtData->buffer;
-	return LRUBuffer->fixCount;
+	BM_Buffer *buffer = mgmtData->buffer;
+	// return our fixCount from buffer
+	return buffer->fixCount;
 }
 
 int getNumReadIO (BM_BufferPool *const bm){
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
+	// return out reading counter from buffer pool management data
 	return mgmtData->numReadIO;
 };
 int getNumWriteIO (BM_BufferPool *const bm){
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
+	// return out reading counter from buffer pool management data
 	return mgmtData->numWriteIO;
 };
 
@@ -184,6 +220,14 @@ int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex){
 		}
 	}
 	return position;
+}
+
+int searchInsertPosition(int currentPos, int *fixCount, int totalPages){
+	int insertPosition = -1;
+	for(int i = currentPos; (i < totalPages + currentPos && (insertPosition < 0)); i++){
+		if(fixCount[i] == 0) insertPosition = i;
+	}
+	return insertPosition;
 }
 
 int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages){
