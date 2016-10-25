@@ -35,14 +35,14 @@ typedef struct BM_PageHandle {
 } BM_PageHandle;
 
 // STRUCTURES ADDED IN ASSIGNMENT 2
-// Structure with data for buffer management
+// Structure with data for buffer pool management
 typedef struct BM_Mgmtdata{
   int numReadIO; // File reading counter
   int numWriteIO; //File writing counter
   SM_FileHandle fileHandle; // File handler related with buffer
   void* buffer; // Buffer structure.
 } BM_Mgmtdata;
-//Structure with buffer data
+//Structure with buffer management data
 typedef struct BM_Buffer{
   SM_PageHandle* frameBuffer; // Buffer array
   int *pageIndex; // Array relating buffer position and page number
