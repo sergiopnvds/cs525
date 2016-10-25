@@ -159,9 +159,7 @@ Additoinally, we include an extra file called "test_assign1_2.c" that include so
 	9.Problems solved
 +--------------------------------------------------------------+
 
-# Problem description here
-
-# Problem description here
+# Insertion of page in frame buffer when the LRU or pointed frame is fixed.
 
 +--------------------------------------------------------------+
 	10.Problems to be solved
