@@ -125,9 +125,9 @@ A clean instruction has been added to Makefile, it remmoves all .o and executabl
 	
 	Returns the insert position in a LRU buffer discarding fixed.
 
-
-
-
+#searchBitZero:
+	
+	Returns the insert position in a CLOCK buffer discarding fixed.
 
 +--------------------------------------------------------------+
 	6.Data structure
@@ -141,7 +141,7 @@ BM_ManagementData
 +--------------------------------------------------------------+
 	7.Extra credit
 +--------------------------------------------------------------+
-As the techer assistant told as, the extra credit will be given if additional tests are implemented. Because of that, in the next section we describe the test added to the store manager code.
+It has been implemented the CLOCK strategy and its test.
 
 +--------------------------------------------------------------+
 	8.Test cases
