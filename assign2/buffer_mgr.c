@@ -45,12 +45,14 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 		bool *dirtyFlags = malloc(sizeof(bool)*numPages);
 		int *fixCount = malloc(sizeof(int)*numPages);
 		long *lastUseTime = malloc(sizeof(long)*numPages);
+		int *clockBits = malloc(sizeof(int)*numPages);
 		// Gives starting values for each management array
 		for(int i = 0; i < numPages;i++){
 			pageIndex[i] = NO_PAGE;
 			dirtyFlags[i] = FALSE;
 			fixCount[i] = 0;
-			lastUseTime[i] = -1; 
+			lastUseTime[i] = -1;
+			clockBits[i] = 0; 
 		}
 		// Save data in structure
 		buffer->frameBuffer = frameBuffer;
@@ -60,6 +62,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 		buffer->insertPos = 0;
 		buffer->timeCounter = 0;
 		buffer->lastUseTime = lastUseTime;
+		buffer->clockBits = clockBits;
 
 		// Save and initialize our aux buffer pool management data
 		BM_Mgmtdata *mgmtData = malloc(sizeof(BM_Mgmtdata));
@@ -269,11 +272,22 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		int insertionIndex = -1;
 		// Look for insert position according to replacement strategy.
 		// Discarding if frame is being used.
-		if(bm->strategy == RS_LRU){
+		switch(bm->strategy){
+			case RS_FIFO:
+				insertionIndex = searchInsertPosition(buffer->insertPos,buffer->fixCount, bm->numPages);
+				break;
+			case RS_LRU:
+				insertionIndex = searchLowerTime(buffer->lastUseTime, buffer->fixCount, bm->numPages);
+				break;
+			case RS_CLOCK:
+				insertionIndex = searchBitZero(buffer->insertPos,buffer->fixCount, buffer->clockBits, bm->numPages);
+				break;
+		}
+/*		if(bm->strategy == RS_LRU){
 			insertionIndex = searchLowerTime(buffer->lastUseTime, buffer->fixCount, bm->numPages);
 		}else if(bm->strategy == RS_FIFO){
 			insertionIndex = searchInsertPosition(buffer->insertPos,buffer->fixCount, bm->numPages);
-		}
+		}*/
 		if(insertionIndex < 0) return RC_OK; // DEFINE NEW CODE FOR THIS?
 
 		// If page to be replace is marked as dirty 
@@ -304,6 +318,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		buffer->fixCount[insertionIndex] = 1;
 		buffer->insertPos = (insertionIndex + 1)%bm->numPages;
 		buffer->lastUseTime[insertionIndex] = buffer->timeCounter++;
+		buffer->clockBits[insertionIndex] = 1;
 	}else{
 		// If it is already in buffer
 		// Save read page data in BM_PageHandle structure
@@ -313,6 +328,8 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		buffer->fixCount[index]++;
 		// If replacement strategy is LRU, updates time counter.
 		if(bm->strategy == RS_LRU) buffer->lastUseTime[index] = buffer->timeCounter++;
+		// If replacement strategy is CLOCK, set CLOCK bit to 1.
+		buffer->clockBits[index] = 1;
 	}
 	return RC_OK;
 
@@ -536,5 +553,43 @@ int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages){
 		if(lastUseTime[lowerIndex] > lastUseTime[i] && fixCount[i] == 0) lowerIndex = i;
 	}
 	return fixCount[lowerIndex] == 0 ? lowerIndex : -1;
+}
+
+/**************************************************************************************************
+ * Function Name: searchBitZero
+ * Description:
+ *      Returns the insert position in a CLOCK buffer discarding fixed.
+ *
+ * Parameters:
+ *    	int currentPos
+ *		int *fixCount
+ *		int totalPages
+ *
+ * Return:
+ *    int: index of frame in buffer to write page. Returns -1 if is not space available.
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-25  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
+int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages){
+	int fixFailCount = 0;
+	int insertPosition = -1;
+	for(int i = currentPos; (fixFailCount<totalPages) && (insertPosition < 0); i = (i+1)%totalPages){
+		if(clockBits[i] == 1){
+			clockBits[i] = 0;
+		}else{
+		 	if(fixCount[i] == 0){
+				insertPosition = i;
+		 	}else{
+		 		fixFailCount++;
+		 	}
+		}
+	}
+	return insertPosition;
 }
 
