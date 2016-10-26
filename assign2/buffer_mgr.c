@@ -563,6 +563,7 @@ int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages){
  * Parameters:
  *    	int currentPos
  *		int *fixCount
+ *		int *clockBits
  *		int totalPages
  *
  * Return:
