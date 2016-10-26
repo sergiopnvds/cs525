@@ -282,6 +282,12 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 			case RS_CLOCK:
 				insertionIndex = searchBitZero(buffer->insertPos,buffer->fixCount, buffer->clockBits, bm->numPages);
 				break;
+			case RS_LFU:
+				//TODO: Implement insertion index retrieval function for LFU
+				break;
+			case RS_LRU_K:
+				//TODO: Implement insertion index retrieval function for LRU_K
+				break;
 		}
 /*		if(bm->strategy == RS_LRU){
 			insertionIndex = searchLowerTime(buffer->lastUseTime, buffer->fixCount, bm->numPages);
