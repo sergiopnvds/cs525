@@ -51,6 +51,7 @@ typedef struct BM_Buffer{
   int insertPos; // Insertion position for FIFO buffer
   long *lastUseTime; // Array relating buffer position and last use time
   int timeCounter; // Time counter to update *lastUseTime. Increase each pinPage.
+  int *clockBits; // Time counter to update *lastUseTime. Increase each pinPage.
 } BM_Buffer;
 
 // convenience macros
@@ -85,5 +86,6 @@ int getNumWriteIO (BM_BufferPool *const bm);
 int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex);
 int searchInsertPosition(int currentPos, int *fixCount, int totalPages);
 int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages);
+int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages);
 
 #endif
