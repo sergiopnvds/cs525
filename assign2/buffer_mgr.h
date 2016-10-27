@@ -52,6 +52,7 @@ typedef struct BM_Buffer{
   long *lastUseTime; // Array relating buffer position and last use time
   int timeCounter; // Time counter to update *lastUseTime. Increase each pinPage.
   int *clockBits; // Time counter to update *lastUseTime. Increase each pinPage.
+  int *frequenceCount; // Time counter to update *lastUseTime. Increase each pinPage.
 } BM_Buffer;
 
 // convenience macros
@@ -87,5 +88,6 @@ int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex);
 int searchInsertPosition(int currentPos, int *fixCount, int totalPages);
 int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages);
 int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages);
+int searchLowerFrequence(int *frequenceCount, int *fixCount, int totalPages);
 
 #endif

@@ -46,6 +46,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 		int *fixCount = malloc(sizeof(int)*numPages);
 		long *lastUseTime = malloc(sizeof(long)*numPages);
 		int *clockBits = malloc(sizeof(int)*numPages);
+		int *frequenceCount = malloc(sizeof(int)*numPages);
 		// Gives starting values for each management array
 		for(int i = 0; i < numPages;i++){
 			pageIndex[i] = NO_PAGE;
@@ -53,6 +54,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 			fixCount[i] = 0;
 			lastUseTime[i] = -1;
 			clockBits[i] = 0; 
+			frequenceCount[i] = 0; 
 		}
 		// Save data in structure
 		buffer->frameBuffer = frameBuffer;
@@ -63,6 +65,7 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 		buffer->timeCounter = 0;
 		buffer->lastUseTime = lastUseTime;
 		buffer->clockBits = clockBits;
+		buffer->frequenceCount = frequenceCount;
 
 		// Save and initialize our aux buffer pool management data
 		BM_Mgmtdata *mgmtData = malloc(sizeof(BM_Mgmtdata));
@@ -283,6 +286,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 				insertionIndex = searchBitZero(buffer->insertPos,buffer->fixCount, buffer->clockBits, bm->numPages);
 				break;
 			case RS_LFU:
+				insertionIndex = searchLowerFrequence(buffer->frequenceCount, buffer->fixCount, bm->numPages);
 				//TODO: Implement insertion index retrieval function for LFU
 				break;
 			case RS_LRU_K:
@@ -325,6 +329,7 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		buffer->insertPos = (insertionIndex + 1)%bm->numPages;
 		buffer->lastUseTime[insertionIndex] = buffer->timeCounter++;
 		buffer->clockBits[insertionIndex] = 1;
+		buffer->frequenceCount[insertionIndex] = 1;
 	}else{
 		// If it is already in buffer
 		// Save read page data in BM_PageHandle structure
@@ -336,6 +341,8 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		if(bm->strategy == RS_LRU) buffer->lastUseTime[index] = buffer->timeCounter++;
 		// If replacement strategy is CLOCK, set CLOCK bit to 1.
 		buffer->clockBits[index] = 1;
+		// If replacement strategy is LFU, increases uses count by 1.
+		buffer->frequenceCount[index]++;
 	}
 	return RC_OK;
 
@@ -581,7 +588,7 @@ int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages){
  * History:
  *    Date        Name                                              Content
  *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-25  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *    2016-10-26  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
 **************************************************************************************************/
 int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages){
 	int fixFailCount = 0;
@@ -598,5 +605,34 @@ int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages)
 		}
 	}
 	return insertPosition;
+}
+
+/**************************************************************************************************
+ * Function Name: searchLowerFrequence
+ * Description:
+ *      Returns the insert position in a LFU buffer discarding fixed.
+ *
+ * Parameters:
+ *    	long *lastUseTime
+ *		int *fixCount
+ *		int totalPages
+ *
+ * Return:
+ *    int: index of frame in buffer to write page. Returns -1 if is not space available.
+ *
+ * Author:
+ *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *    Date        Name                                              Content
+ *    ----------  ------------------------------------------------  ------------------------------
+ *    2016-10-26  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+**************************************************************************************************/
+int searchLowerFrequence(int *frequenceCount, int *fixCount, int totalPages){
+	int lowerIndex = 0;
+	for(int i = 1; i < totalPages; i++){
+		if(frequenceCount[lowerIndex] > frequenceCount[i] && fixCount[i] == 0) lowerIndex = i;
+	}
+	return fixCount[lowerIndex] == 0 ? lowerIndex : -1;
 }
 
