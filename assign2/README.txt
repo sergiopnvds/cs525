@@ -129,6 +129,10 @@ A clean instruction has been added to Makefile, it remmoves all .o and executabl
 	
 	Returns the insert position in a CLOCK buffer discarding fixed.
 
+#searchLowerFrequence:
+	
+	Returns the insert position in a LFU buffer discarding fixed.
+
 +--------------------------------------------------------------+
 	6.Data structure
 +--------------------------------------------------------------+
@@ -142,18 +146,16 @@ BM_ManagementData
 	7.Extra credit
 +--------------------------------------------------------------+
 It has been implemented the CLOCK strategy and its test.
+It has been implemented the LFU strategy and its test.
 
 +--------------------------------------------------------------+
 	8.Test cases
 +--------------------------------------------------------------+
-Additoinally, we include an extra file called "test_assign1_2.c" that include some extra test to chaeck and validity so more thoroughly the store manager coded. "test_assign1_2.c" contains the following thext cases.
+Additoinally, we include an extra file called "test_assign2_2.c" that include some extra test to check and validate optional replacement strategies.
 
-	#Test testCreateOpenClose: Checks if create, open and close returns error codes correctly.
+	#Test testCLOCK
 
-	#Test testAppendEmptyBlockEnsureCapacity: Checks if appendEmptyBlock and ensureCapacity 
-		functions works as expected.
-	
-	#Test testWriteReadBlock: test every read and write operations
+	#Test testLFU
 
 +--------------------------------------------------------------+
 	9.Problems solved
