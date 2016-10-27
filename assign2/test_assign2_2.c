@@ -206,7 +206,6 @@ testLFU ()
   unpinPage(bm, h);
   ASSERT_EQUALS_POOL(poolContents[i],bm,"unpin page");
   
-  printf("%i\n", requests[i]);
   pinPage(bm, h, requests[i]);
   unpinPage(bm, h);
   ASSERT_EQUALS_POOL(poolContents[++i],bm,"pool content after page unpinning");
