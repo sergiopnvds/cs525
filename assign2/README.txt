@@ -44,12 +44,12 @@ test_helper.h
 +--------------------------------------------------------------+
 	3.Milestone 
 +--------------------------------------------------------------+
-Store manager first functional version.
+Buffer manager first functional version.
 
 +--------------------------------------------------------------+
 	4.Installation instruction
 +--------------------------------------------------------------+
-To compile our code we will use the "Makelfile" provided.
+To compile our code we will use the "Makefile" provided.
 
 The procedure will be to open a terminal window and compile the code excuting the "Makefile" using:
 
@@ -57,7 +57,7 @@ The procedure will be to open a terminal window and compile the code excuting th
 
 This "Makefile" is prepared to compile all files belonged to the Buffer Manager and provide test_assign2_1 executable file.
 
-A clean instruction has been added to Makefile, it remmoves all .o and executable files:
+A clean instruction has been added to Makefile, it removes all .o and executable files:
 
 	$ make clean
 
