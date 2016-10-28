@@ -42,6 +42,7 @@ typedef struct BM_Mgmtdata{
   SM_FileHandle fileHandle; // File handler related with buffer
   void* buffer; // Buffer structure.
 } BM_Mgmtdata;
+
 //Structure with buffer management data
 typedef struct BM_Buffer{
   SM_PageHandle* frameBuffer; // Buffer array with frames
@@ -50,7 +51,9 @@ typedef struct BM_Buffer{
   bool *dirtyFlags; // Array relating buffer position and marked dirty flags
   int insertPos; // Insertion position for FIFO buffer
   long *lastUseTime; // Array relating buffer position and last use time
+  long *lastUseTimeLRUK; // Array relating buffer position, last K use times.
   int timeCounter; // Time counter to update *lastUseTime. Increase each pinPage.
+  int K; // LRU-K K value
   int *clockBits; // Time counter to update *lastUseTime. Increase each pinPage.
   int *frequenceCount; // Time counter to update *lastUseTime. Increase each pinPage.
 } BM_Buffer;
@@ -87,7 +90,9 @@ int getNumWriteIO (BM_BufferPool *const bm);
 int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex);
 int searchInsertPosition(int currentPos, int *fixCount, int totalPages);
 int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages);
+int searchLowerTimeK(long *lastUseTimeLRUK, int *fixCount, int totalPages, int K, long now);
 int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages);
 int searchLowerFrequence(int *frequenceCount, int *fixCount, int totalPages);
+void addHeap(long *array, int numPage, int K, long value);
 
 #endif

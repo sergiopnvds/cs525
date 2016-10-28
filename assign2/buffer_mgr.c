@@ -48,6 +48,12 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 		bool *dirtyFlags = malloc(sizeof(bool)*numPages);
 		int *fixCount = malloc(sizeof(int)*numPages);
 		long *lastUseTime = malloc(sizeof(long)*numPages);
+		long *lastUseTimeLRUK = NULL;
+		int K = -1;
+		if(stratData != NULL){
+			int K = *(int*)stratData;
+			lastUseTimeLRUK = (long *)malloc(numPages * K * sizeof(long));
+		} 
 		int *clockBits = malloc(sizeof(int)*numPages);
 		int *frequenceCount = malloc(sizeof(int)*numPages);
 		// Gives starting values for each management array
@@ -56,8 +62,11 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 			dirtyFlags[i] = FALSE;
 			fixCount[i] = 0;
 			lastUseTime[i] = -1;
-			clockBits[i] = 0; 
-			frequenceCount[i] = 0; 
+			clockBits[i] = 0;
+			frequenceCount[i] = 0;
+			if(lastUseTimeLRUK != NULL)
+				for(int j = 0; j < K; j++)
+					lastUseTimeLRUK[i*K+j] = -1;
 		}
 		// Save data in structure
 		buffer->frameBuffer = frameBuffer;
@@ -67,8 +76,10 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 		buffer->insertPos = 0;
 		buffer->timeCounter = 0;
 		buffer->lastUseTime = lastUseTime;
+		buffer->lastUseTimeLRUK = lastUseTimeLRUK;
 		buffer->clockBits = clockBits;
 		buffer->frequenceCount = frequenceCount;
+		buffer->K = K;
 
 		// Save and initialize our aux buffer pool management data
 		BM_Mgmtdata *mgmtData = malloc(sizeof(BM_Mgmtdata));
@@ -308,10 +319,9 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 				break;
 			case RS_LFU:
 				insertionIndex = searchLowerFrequence(buffer->frequenceCount, buffer->fixCount, bm->numPages);
-				//TODO: Implement insertion index retrieval function for LFU
 				break;
 			case RS_LRU_K:
-				//TODO: Implement insertion index retrieval function for LRU_K
+				insertionIndex = searchLowerTimeK(buffer->lastUseTimeLRUK, buffer->fixCount, bm->numPages, buffer->K, buffer->timeCounter);
 				break;
 		}
 /*		if(bm->strategy == RS_LRU){
@@ -349,6 +359,8 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		buffer->fixCount[insertionIndex] = 1;
 		buffer->insertPos = (insertionIndex + 1)%bm->numPages;
 		buffer->lastUseTime[insertionIndex] = buffer->timeCounter++;
+		if(buffer->lastUseTimeLRUK != NULL)
+			addHeap(buffer->lastUseTimeLRUK, insertionIndex, buffer->K, buffer->timeCounter);
 		buffer->clockBits[insertionIndex] = 1;
 		buffer->frequenceCount[insertionIndex] = 1;
 	}else{
@@ -360,6 +372,9 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		buffer->fixCount[index]++;
 		// If replacement strategy is LRU, updates time counter.
 		if(bm->strategy == RS_LRU) buffer->lastUseTime[index] = buffer->timeCounter++;
+		if(bm->strategy == RS_LRU_K)
+			addHeap(buffer->lastUseTimeLRUK, index, buffer->K, buffer->timeCounter++);
+		
 		// If replacement strategy is CLOCK, set CLOCK bit to 1.
 		buffer->clockBits[index] = 1;
 		// If replacement strategy is LFU, increases uses count by 1.
@@ -617,6 +632,43 @@ int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages){
 }
 
 /**************************************************************************************************
+ * Function Name: searchLowerTimeK
+ * Description:
+ *      Returns the insert position in a LRU-K buffer discarding.
+ *
+ * Parameters:
+ *    long *lastUseTimeLRUK
+ *		int *fixCount
+ *		int totalPages
+ *
+ * Return:
+ *    int: index of frame in buffer to write page. Returns -1 if is not space available.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Jose Carmona     <jcarmonalopez@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-19  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-10-19  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Main logic.
+ *	2016-10-19  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
+int searchLowerTimeK(long *lastUseTimeLRUK, int *fixCount, int totalPages, int K, long now){
+	int lowerIndex = 0;
+	for(int i = 1; i < totalPages; i++){
+		if(fixCount[i] == 0) continue;
+		long lowerIndexValue = now - lastUseTimeLRUK[i*K+lowerIndex];
+		long currentValue = now - lastUseTimeLRUK[i*K+i];
+		if(lowerIndexValue > currentValue) lowerIndex = i;
+	}
+	return fixCount[lowerIndex] == 0 ? lowerIndex : -1;
+}
+
+/**************************************************************************************************
  * Function Name: searchBitZero
  * Description:
  *      Returns the insert position in a CLOCK buffer discarding fixed.
@@ -659,9 +711,7 @@ int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages)
 		}
 	}
 	return insertPosition;
-}
-
-/**************************************************************************************************
+}/**************************************************************************************************
  * Function Name: searchLowerFrequence
  * Description:
  *      Returns the insert position in a LFU buffer discarding fixed.
@@ -685,9 +735,11 @@ int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages)
  *	----------  ------------------------------------------------  ------------------------------
  *	2016-10-19  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Initialization.
  *	2016-10-19  Victor Portals <vportalslorenzo@hawk.iit.edu>      Main logic.
- *	2016-10-19 Jose Carmona     <jcarmonalopez@hawk.iit.edu>       Add header comment,
+ *	2016-10-19  Jose Carmona     <jcarmonalopez@hawk.iit.edu>       Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
+
+
 int searchLowerFrequence(int *frequenceCount, int *fixCount, int totalPages){
 	int lowerIndex = 0;
 	for(int i = 1; i < totalPages; i++){
@@ -696,3 +748,38 @@ int searchLowerFrequence(int *frequenceCount, int *fixCount, int totalPages){
 	return fixCount[lowerIndex] == 0 ? lowerIndex : -1;
 }
 
+/**************************************************************************************************
+ * Function Name: addHeap
+ * Description:
+ *      Add the value to the array like a heap.
+ *
+ * Parameters:
+ *    long *array
+ *		int numPage
+ *		int K
+ *		long value
+ * 
+ * Author:
+ *	
+ *	Jose Carmona     <jcarmonalopez@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-19  Victor Portals <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	2016-10-19  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Main logic.
+ *	2016-10-19  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
+void addHeap(long *array, int numPage, int K, long value){
+	for(int i = 0; i < K; i++)
+		if(array[numPage*K+i] == -1){
+			array[numPage*K+i] = value;
+			return;
+		}
+	
+	for(int i = 1; i < K; i++)
+		array[numPage*K+i-1] = array[numPage*K+i];
+	
+	array[numPage*K+K-1] = value;
+}
