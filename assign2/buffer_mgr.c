@@ -11,25 +11,28 @@
 /**************************************************************************************************
  * Function Name: initBufferPool
  * Description:
- *    Create a buffer pool and initializes its management data
+ *	Create a buffer pool and initializes its management data
  *
  * Parameters:
- *    BM_BufferPool *const bm
- *		const char *const pageFileName
- * 		const int numPages
- *		ReplacementStrategy strategy
- *		oid *stratData
+ *	BM_BufferPool *const bm
+ *	const char *const pageFileName
+ * 	const int numPages
+ *	ReplacementStrategy strategy
+ *	oid *stratData
  *
  * Return:
- *    RC: returned code
+ *	RC: returned code
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-10-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-10-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const int numPages, ReplacementStrategy strategy, void *stratData){
 	SM_FileHandle fileHandle;
@@ -97,9 +100,12 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
  *    Victor Portals <vportalslorenzo@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-10-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-10-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 RC shutdownBufferPool(BM_BufferPool *const bm){
 	// Forces all dirty pages to be writed in disk
@@ -118,12 +124,15 @@ RC shutdownBufferPool(BM_BufferPool *const bm){
  *    RC: returned code
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *    Sergio Penavades <spenavadessuarez@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Initialization.
+ *	2016-10-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Main logic.
+ *	2016-10-23  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 RC forceFlushPool(BM_BufferPool *const bm){
 	// Load basic structures
@@ -157,12 +166,15 @@ RC forceFlushPool(BM_BufferPool *const bm){
  *    RC: returned code
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *    Sergio Penavades <spenavadessuarez@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Initialization.
+ *	2016-10-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Main logic.
+ *	2016-10-23  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page){
 	// Load basic structures
@@ -188,12 +200,15 @@ RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page){
  *    RC: returned code
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *    Jose Carmona     <jcarmonalopez@hawk.iit.edu> 
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-12  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Initialization.
+ *	2016-10-12  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Main logic.
+ *	2016-10-24  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page){
 	// Load basic structures
@@ -220,12 +235,15 @@ RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page){
  *    RC: returned code
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *    Jose Carmona     <jcarmonalopez@hawk.iit.edu> 
  *
- * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+* History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-12  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Initialization.
+ *	2016-10-12  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Main logic.
+ *	2016-10-24  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page){
 	// Load basic structures
@@ -257,12 +275,15 @@ RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page){
  *    RC: returned code
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *    Sergio Penavades <spenavadessuarez@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-14  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Initialization.
+ *	2016-10-14  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Main logic.
+ *	2016-10-23  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber pageNum){
 	// Load basic structures
@@ -360,12 +381,15 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
  *    PageNumber*: array of page numbers
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *    Jose Carmona     <jcarmonalopez@hawk.iit.edu> 
  *
- * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+* History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-15  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Initialization.
+ *	2016-10-15  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Main logic.
+ *	2016-10-24  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 PageNumber *getFrameContents (BM_BufferPool *const bm){
 	// Load basic structures
@@ -390,9 +414,12 @@ PageNumber *getFrameContents (BM_BufferPool *const bm){
  *    Victor Portals <vportalslorenzo@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-17  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-10-17  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-10-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 bool *getDirtyFlags (BM_BufferPool *const bm){
 	// Load basic structures
@@ -414,13 +441,17 @@ bool *getDirtyFlags (BM_BufferPool *const bm){
  *    int*: array of fix count.
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-17  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-10-17  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-10-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
+
 int *getFixCounts (BM_BufferPool *const bm){
 	// Load basic structures
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -441,12 +472,15 @@ int *getFixCounts (BM_BufferPool *const bm){
  *    int: count of read operations.
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *    Jose Carmona     <jcarmonalopez@hawk.iit.edu> 
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-17  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Initialization.
+ *	2016-10-17  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Main logic.
+ *	2016-10-24  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 int getNumReadIO (BM_BufferPool *const bm){
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -466,12 +500,15 @@ int getNumReadIO (BM_BufferPool *const bm){
  *    int: count of write operations.
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *    Jose Carmona     <jcarmonalopez@hawk.iit.edu> 
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-10  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-17  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Initialization.
+ *	2016-10-17  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Main logic.
+ *	2016-10-24  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 int getNumWriteIO (BM_BufferPool *const bm){
 	BM_Mgmtdata *mgmtData = bm->mgmtData;
@@ -493,12 +530,15 @@ int getNumWriteIO (BM_BufferPool *const bm){
  *    int: index of page in frame buffer. -1 if is not in buffer.
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-15  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-19  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-10-19  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-10-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex){
 	PageNumber position = NO_PAGE;
@@ -524,12 +564,15 @@ int findPageIndex (int numPage, int totalPages, PageNumber *pageIndex){
  *    int: index of frame in buffer to write page. Returns -1 if is not space available.
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-25  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-19  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-10-19  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-10-20  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 int searchInsertPosition(int currentPos, int *fixCount, int totalPages){
 	int insertPosition = -1;
@@ -553,12 +596,17 @@ int searchInsertPosition(int currentPos, int *fixCount, int totalPages){
  *    int: index of frame in buffer to write page. Returns -1 if is not space available.
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Jose Carmona     <jcarmonalopez@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-24  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-19  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-10-19  Jose Carmona     <jcarmonalopez@hawk.iit.edu>     Main logic.
+ *	2016-10-19  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages){
 	int lowerIndex = 0;
@@ -583,12 +631,18 @@ int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages){
  *    int: index of frame in buffer to write page. Returns -1 if is not space available.
  *
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	
+ *	Jose Carmona     <jcarmonalopez@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu>
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-26  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-19  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Initialization.
+ *	2016-10-19  Jose Carmona     <jcarmonalopez@hawk.iit.edu>      Main logic.
+ *	2016-10-19  Victor Portals <vportalslorenzo@hawk.iit.edu>      Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages){
 	int fixFailCount = 0;
@@ -619,14 +673,20 @@ int searchBitZero(int currentPos, int *fixCount, int *clockBits, int totalPages)
  *
  * Return:
  *    int: index of frame in buffer to write page. Returns -1 if is not space available.
- *
+ * 
  * Author:
- *    Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	
+ *	Jose Carmona     <jcarmonalopez@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu>
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
  *
  * History:
- *    Date        Name                                              Content
- *    ----------  ------------------------------------------------  ------------------------------
- *    2016-10-26  Victor Portals     <vportalslorenzo@hawk.iit.edu>     Initialization.
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-10-19  Sergio Penavades <spenavadessuarez@hawk.iit.edu>   Initialization.
+ *	2016-10-19  Victor Portals <vportalslorenzo@hawk.iit.edu>      Main logic.
+ *	2016-10-19 Jose Carmona     <jcarmonalopez@hawk.iit.edu>       Add header comment,
+ *                                                                  	add comments.
 **************************************************************************************************/
 int searchLowerFrequence(int *frequenceCount, int *fixCount, int totalPages){
 	int lowerIndex = 0;
