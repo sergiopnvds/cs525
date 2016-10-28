@@ -49,9 +49,9 @@ RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName, const
 		int *fixCount = malloc(sizeof(int)*numPages);
 		long *lastUseTime = malloc(sizeof(long)*numPages);
 		long *lastUseTimeLRUK = NULL;
-		int K = -1;
+		long K = -1;
 		if(stratData != NULL){
-			int K = *(int*)stratData;
+			K = *(long*)stratData;
 			lastUseTimeLRUK = (long *)malloc(numPages * K * sizeof(long));
 		} 
 		int *clockBits = malloc(sizeof(int)*numPages);
@@ -358,9 +358,13 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		buffer->dirtyFlags[insertionIndex] = FALSE;
 		buffer->fixCount[insertionIndex] = 1;
 		buffer->insertPos = (insertionIndex + 1)%bm->numPages;
-		buffer->lastUseTime[insertionIndex] = buffer->timeCounter++;
-		if(buffer->lastUseTimeLRUK != NULL)
+		buffer->lastUseTime[insertionIndex] = buffer->timeCounter;
+		if(buffer->lastUseTimeLRUK != NULL){
+			printf("REINICIA COUNTERS\n");
+			addHeap(buffer->lastUseTimeLRUK, insertionIndex, buffer->K, -1);
 			addHeap(buffer->lastUseTimeLRUK, insertionIndex, buffer->K, buffer->timeCounter);
+		}
+		buffer->timeCounter++;
 		buffer->clockBits[insertionIndex] = 1;
 		buffer->frequenceCount[insertionIndex] = 1;
 	}else{
@@ -659,11 +663,17 @@ int searchLowerTime(long *lastUseTime, int *fixCount, int totalPages){
 **************************************************************************************************/
 int searchLowerTimeK(long *lastUseTimeLRUK, int *fixCount, int totalPages, int K, long now){
 	int lowerIndex = 0;
-	for(int i = 1; i < totalPages; i++){
-		if(fixCount[i] == 0) continue;
-		long lowerIndexValue = now - lastUseTimeLRUK[i*K+lowerIndex];
-		long currentValue = now - lastUseTimeLRUK[i*K+i];
-		if(lowerIndexValue > currentValue) lowerIndex = i;
+	if(lastUseTimeLRUK[lowerIndex*K] != -1){
+		for(int i = 1; i < totalPages; i++){
+			if(fixCount[i] != 0) continue;
+			if(lastUseTimeLRUK[i*K] == -1){
+				lowerIndex = i;
+				break;
+			}
+			long lowerIndexValue = lastUseTimeLRUK[lowerIndex*K+(K-1)];
+			long currentValue = lastUseTimeLRUK[i*K+(K-1)];
+			if(lowerIndexValue > currentValue) lowerIndex = i;
+		}
 	}
 	return fixCount[lowerIndex] == 0 ? lowerIndex : -1;
 }
@@ -772,14 +782,8 @@ int searchLowerFrequence(int *frequenceCount, int *fixCount, int totalPages){
  *                                                                  	add comments.
 **************************************************************************************************/
 void addHeap(long *array, int numPage, int K, long value){
-	for(int i = 0; i < K; i++)
-		if(array[numPage*K+i] == -1){
-			array[numPage*K+i] = value;
-			return;
-		}
-	
-	for(int i = 1; i < K; i++)
-		array[numPage*K+i-1] = array[numPage*K+i];
-	
-	array[numPage*K+K-1] = value;
+	for(int i = K*numPage + (K-1); i > (K*numPage); i--){
+		array[i] = array[i-1];
+	}
+	array[K*numPage] = value;	
 }

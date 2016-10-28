@@ -52,7 +52,7 @@ typedef struct BM_Buffer{
   int insertPos; // Insertion position for FIFO buffer
   long *lastUseTime; // Array relating buffer position and last use time
   long *lastUseTimeLRUK; // Array relating buffer position, last K use times.
-  int timeCounter; // Time counter to update *lastUseTime. Increase each pinPage.
+  long timeCounter; // Time counter to update *lastUseTime. Increase each pinPage.
   int K; // LRU-K K value
   int *clockBits; // Time counter to update *lastUseTime. Increase each pinPage.
   int *frequenceCount; // Time counter to update *lastUseTime. Increase each pinPage.

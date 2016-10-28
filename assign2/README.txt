@@ -55,7 +55,7 @@ The procedure will be to open a terminal window and compile the code excuting th
 
 	$ make
 
-This "Makefile" is prepared to compile all files belonged to the Buffer Manager and provide test_assign2_1 executable file.
+This "Makefile" is prepared to compile all files belonged to the Buffer Manager and provide test_assign2_1 and test_assign2_2 executable files.
 
 A clean instruction has been added to Makefile, it removes all .o and executable files:
 
@@ -125,6 +125,10 @@ A clean instruction has been added to Makefile, it removes all .o and executable
 	
 	Returns the insert position in a LRU buffer discarding fixed.
 
+#searchLowerTimeK:
+	
+	Returns the insert position in a LRU-K buffer discarding.
+
 #searchBitZero:
 	
 	Returns the insert position in a CLOCK buffer discarding fixed.
@@ -132,6 +136,10 @@ A clean instruction has been added to Makefile, it removes all .o and executable
 #searchLowerFrequence:
 	
 	Returns the insert position in a LFU buffer discarding fixed.
+
+#addHeap:
+	
+	Add the value to the array like a heap.
 
 +--------------------------------------------------------------+
 	6.Data structure
@@ -147,6 +155,7 @@ BM_ManagementData
 +--------------------------------------------------------------+
 It has been implemented the CLOCK strategy and its test.
 It has been implemented the LFU strategy and its test.
+It has been implemented the LRU_K strategy and its test.
 
 +--------------------------------------------------------------+
 	8.Test cases
@@ -156,6 +165,8 @@ Additoinally, we include an extra file called "test_assign2_2.c" that include so
 	#Test testCLOCK
 
 	#Test testLFU
+
+	#Test testLRUK
 
 +--------------------------------------------------------------+
 	9.Problems solved

@@ -41,8 +41,8 @@ main (void)
   initStorageManager();
   testName = "";
 
-  //testCLOCK();
-  //testLFU();
+  testCLOCK();
+  testLFU();
   testLRUK();
 }
 
@@ -234,22 +234,27 @@ testLRUK ()
     "[1 0],[2 0],[-1 0]",
     "[1 0],[2 0],[3 0]",
     "[1 0],[4 0],[3 0]",
+    "[1 0],[4 0],[3 0]",
+    "[1 0],[4 0],[3 0]",
+    "[5 0],[4 0],[3 0]",
+    "[6 0],[4 0],[3 0]",
   };
-  const int requests[] = {1,2,1,3,4};
-  const int numLinRequests = 5;
+  const int requests[] = {1,2,1,3,4,4,3,5,6};
+  const int numLinRequests = 9;
   const int numChangeRequests = 5;
 
   int i;
   BM_BufferPool *bm = MAKE_POOL();
   BM_PageHandle *h = MAKE_PAGE_HANDLE();
-  testName = "Testing LFU page replacement";
+  testName = "Testing LRU_K page replacement";
 
   CHECK(createPageFile("testbuffer.bin"));
 
   createDummyPages(bm, 100);
 
-  int k = 2;
-  CHECK(initBufferPool(bm, "testbuffer.bin", 3, RS_LRU_K, &k));
+  long k = 2;
+  void *stratData = &k;
+  CHECK(initBufferPool(bm, "testbuffer.bin", 3, RS_LRU_K, stratData));
 
   // reading some pages linearly with direct unpin and no modifications
   for(i = 0; i < numLinRequests; i++)
@@ -259,35 +264,8 @@ testLRUK ()
       ASSERT_EQUALS_POOL(poolContents[i], bm, "check pool content without fixed pages");
     }
 
-  // // pin one page and test remainder
-  // i = numLinRequests;
-  // pinPage(bm, h, requests[i]);
-  // ASSERT_EQUALS_POOL(poolContents[i],bm,"pool content after pin page");
-
-  // // read pages and mark them as dirty
-  // for(i = numLinRequests + 1; i < numLinRequests + numChangeRequests + 1; i++)
-  //   {
-  //     pinPage(bm, h, requests[i]);
-  //     unpinPage(bm, h);
-  //     ASSERT_EQUALS_POOL(poolContents[i], bm, "check pool content with fixed page");
-  //   }
-
-
-  // i = numLinRequests + numChangeRequests + 1;
-  // h->pageNum = 4;
-  // unpinPage(bm, h);
-  // ASSERT_EQUALS_POOL(poolContents[i],bm,"unpin page");
-  
-  // pinPage(bm, h, requests[i]);
-  // unpinPage(bm, h);
-  // ASSERT_EQUALS_POOL(poolContents[++i],bm,"pool content after page unpinning");
-
-  // // check number of write IOs
-  // ASSERT_EQUALS_INT(0, getNumWriteIO(bm), "check number of write I/Os");
-  // ASSERT_EQUALS_INT(7, getNumReadIO(bm), "check number of read I/Os");
-
-  // CHECK(shutdownBufferPool(bm));
-  // CHECK(destroyPageFile("testbuffer.bin"));
+  CHECK(shutdownBufferPool(bm));
+  CHECK(destroyPageFile("testbuffer.bin"));
 
   free(bm);
   free(h);
