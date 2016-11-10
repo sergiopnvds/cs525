@@ -29,34 +29,48 @@ RC createTable (char *name, Schema *schema){
 	}
     writeTableInfo(name, schema);
     //Schema *schema2 = readSchema(name);
-    //printSchema(schema2);
+    //printSchema(schema);
     //printf("InfoSize %i\n", getNumPagesSchema(name));
 	return RC_OK;
 }
 RC openTable (RM_TableData *rel, char *name){
+	rel->name = name;
+	rel->schema = readSchema(name);
+	rel->mgmtData = NULL;
 	return RC_OK;
 }
 RC closeTable (RM_TableData *rel){
+	//TODO: UPDATE INFO: FREE SPACE
+	//TODO: CALL BUFFER TO FINISH
 	return RC_OK;
 }
 RC deleteTable (char *name){
+	destroyPageFile(name);
+	//TODO: Free other resources if necessary
 	return RC_OK;
 }
 int getNumTuples (RM_TableData *rel){
+	//TODO: 3/10
 	return 0;
 }
 
 // handling records in a table
 RC insertRecord (RM_TableData *rel, Record *record){
+	//TODO: 4/10
+	//Obtener posicion de insercion
 	return RC_OK;
 }
 RC deleteRecord (RM_TableData *rel, RID id){
+	//TODO: 4/10
+	// Que hacer con el espacio libre.
 	return RC_OK;
 }
 RC updateRecord (RM_TableData *rel, Record *record){
+	//TODO: 4/10
 	return RC_OK;
 }
 RC getRecord (RM_TableData *rel, RID id, Record *record){
+	//TODO: 4/10
 	return RC_OK;
 }
 
@@ -76,9 +90,17 @@ int getRecordSize (Schema *schema){
 	return 0;
 }
 Schema *createSchema (int numAttr, char **attrNames, DataType *dataTypes, int *typeLength, int keySize, int *keys){
-	return RC_OK;
+	Schema *newSchema = malloc(sizeof(Schema));
+	newSchema->numAttr = numAttr;
+	newSchema->attrNames = attrNames;
+	newSchema->dataTypes = dataTypes;
+	newSchema->typeLength = typeLength;
+	newSchema->keySize = keySize;
+	newSchema->keyAttrs = keys;
+	return newSchema;
 }
 RC freeSchema (Schema *schema){
+	//TODO: QUE HACE ESTO?
 	return RC_OK;
 }
 
