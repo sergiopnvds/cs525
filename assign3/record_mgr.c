@@ -10,7 +10,9 @@
 
 
 int writeTableInfo(char *name, Schema *schema);
-Schema readSchema(char *name);
+Schema *readSchema(char *name);
+short getNumPagesSchema(char *name);
+
 void printSchema(Schema *schema);
 
 // table and manager
@@ -26,8 +28,9 @@ RC createTable (char *name, Schema *schema){
 		return createStatus;
 	}
     writeTableInfo(name, schema);
-    Schema schema2 = readSchema(name);
-    printSchema(&schema2);
+    //Schema *schema2 = readSchema(name);
+    //printSchema(schema2);
+    //printf("InfoSize %i\n", getNumPagesSchema(name));
 	return RC_OK;
 }
 RC openTable (RM_TableData *rel, char *name){
@@ -99,7 +102,7 @@ int writeTableInfo(char *name, Schema *schema){
 	//Open file to read
   	FILE *file = fopen(name, "r+");
   	// We already have management data for storage manager stored
-  	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
+  	fseek(file, sizeof(SM_FileHeader) + sizeof(short), SEEK_SET);
   	// Write number of attributes
   	fwrite(&(schema->numAttr), sizeof(int), 1, file);
   	// Write each string preceded by its lenght
@@ -114,21 +117,28 @@ int writeTableInfo(char *name, Schema *schema){
   	fwrite(&(schema->keySize), sizeof(int), 1, file);
 	fwrite(schema->keyAttrs, sizeof(int), schema->keySize, file);
 
+	long schemaSize = ftell(file) - sizeof(SM_FileHeader);
+
+	short numPagesSchema = schemaSize/PAGE_SIZE + 1;
+
+  	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
+	fwrite(&numPagesSchema, sizeof(short), 1, file);
+
   	fclose(file);
 }
 
-Schema readSchema(char *name){
+Schema *readSchema(char *name){
   	FILE *file = fopen(name, "r+");
   	// Reserve space for header size
-  	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
+  	// sizeof(short) for tableInfoSize
+  	fseek(file, sizeof(SM_FileHeader) + sizeof(short), SEEK_SET);
   	Schema *schema = malloc(sizeof(Schema));
 
   	fread(&(schema->numAttr), sizeof(int), 1, file);
   	schema->attrNames = malloc(schema->numAttr * sizeof(char*));
-  	for(int i = 0; i < schema->numAttr; i++){
+  	for(int i = 0; i < schema->numAttr;  i++){
   		short attrNameLen = 0;
   		fread(&attrNameLen, sizeof(short), 1, file);
-  		printf("%i\n", attrNameLen);
   		schema->attrNames[i] = malloc(attrNameLen);
   		fread(schema->attrNames[i], attrNameLen, 1, file);
   	}
@@ -141,10 +151,16 @@ Schema readSchema(char *name){
 	fread(schema->keyAttrs, sizeof(int), schema->keySize, file);
   	fclose(file);
 
-  	return *schema;
+  	return schema;
 }
 
-
+short getNumPagesSchema(char *name){
+  	FILE *file = fopen(name, "r+");
+  	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
+  	short tableInfoSize;
+  	fread(&tableInfoSize, sizeof(short), 1, file);
+  	return tableInfoSize;
+}
 
 void printSchema(Schema *schema){
 	printf("numAttr: %i\n", schema->numAttr);
