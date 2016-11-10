@@ -28,20 +28,25 @@ RC createTable (char *name, Schema *schema){
 		return createStatus;
 	}
     writeTableInfo(name, schema);
-    //Schema *schema2 = readSchema(name);
-    //printSchema(schema);
-    //printf("InfoSize %i\n", getNumPagesSchema(name));
 	return RC_OK;
 }
 RC openTable (RM_TableData *rel, char *name){
 	rel->name = name;
 	rel->schema = readSchema(name);
-	rel->mgmtData = NULL;
+
+	BM_BufferPool *bm = malloc(sizeof(BM_BufferPool));
+	initBufferPool(bm, name, 10, RS_FIFO, NULL);
+
+	rel->mgmtData = bm;
+	// LLAMAMOS A INITBUFFERPOOL?
+	// QUIEN DECIDE STRATEGY?
+	//   "      "    NUMPAGES?
 	return RC_OK;
 }
 RC closeTable (RM_TableData *rel){
 	//TODO: UPDATE INFO: FREE SPACE
 	//TODO: CALL BUFFER TO FINISH
+	shutdownBufferPool(rel->mgmtData);
 	return RC_OK;
 }
 RC deleteTable (char *name){
@@ -57,7 +62,8 @@ int getNumTuples (RM_TableData *rel){
 // handling records in a table
 RC insertRecord (RM_TableData *rel, Record *record){
 	//TODO: 4/10
-	//Obtener posicion de insercion
+	//Buscamos posicion de insercion
+	//Escribimos
 	return RC_OK;
 }
 RC deleteRecord (RM_TableData *rel, RID id){
@@ -67,6 +73,7 @@ RC deleteRecord (RM_TableData *rel, RID id){
 }
 RC updateRecord (RM_TableData *rel, Record *record){
 	//TODO: 4/10
+	//Encontramos record
 	return RC_OK;
 }
 RC getRecord (RM_TableData *rel, RID id, Record *record){
@@ -87,7 +94,24 @@ RC closeScan (RM_ScanHandle *scan){
 
 // dealing with schemas
 int getRecordSize (Schema *schema){
-	return 0;
+	int recordSize = 0;
+	for(int i = 0; i < schema->numAttr; i++){
+		switch(schema->dataTypes[i]){
+		  case DT_INT: 
+		  	recordSize += sizeof(int);
+		  	break;
+		  case DT_STRING: 
+		  	recordSize += schema->typeLength[i];
+		  	break;
+		  case DT_FLOAT: 
+		  	recordSize += sizeof(float);
+		  	break;
+		  case DT_BOOL: 
+		  	recordSize += sizeof(bool);
+		  	break;
+		}
+	}
+	return recordSize;
 }
 Schema *createSchema (int numAttr, char **attrNames, DataType *dataTypes, int *typeLength, int keySize, int *keys){
 	Schema *newSchema = malloc(sizeof(Schema));
