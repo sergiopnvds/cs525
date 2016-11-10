@@ -5,6 +5,11 @@ DEPS = dberror.h storage_mgr.h buffer_mgr.h buffer_mgr_stat.h record_mgr.h expr.
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
+
+
+dev_test:  dev_test.o storage_mgr.o buffer_mgr.o buffer_mgr_stat.o record_mgr.o rm_serializer.o expr.o dberror.o 
+	$(CC) -o $@ $^ -I.
+
 test_assign3: test_assign3_1
 
 test_assign3_1:  test_assign3_1.o storage_mgr.o buffer_mgr.o buffer_mgr_stat.o record_mgr.o rm_serializer.o expr.o dberror.o 

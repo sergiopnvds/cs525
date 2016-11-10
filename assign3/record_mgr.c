@@ -10,10 +10,18 @@
 
 
 int writeTableInfo(char *name, Schema *schema);
-Schema *readSchema(char *name);
+void readSchema(char *name, Schema *schema, int *numPagesSchema);
 short getNumPagesSchema(char *name);
+int calculatePageCap(Schema *schema);
 
 void printSchema(Schema *schema);
+
+typedef struct TableHandle
+{
+  BM_BufferPool *bm;
+  int pageCap;
+  int numPagesSchema;
+} TableHandle;
 
 // table and manager
 RC initRecordManager (void *mgmtData){
@@ -31,13 +39,21 @@ RC createTable (char *name, Schema *schema){
 	return RC_OK;
 }
 RC openTable (RM_TableData *rel, char *name){
-	rel->name = name;
-	rel->schema = readSchema(name);
+	int *numPagesSchema = malloc(sizeof(int));
+	Schema *schema = malloc(sizeof(Schema));
+	readSchema(name, schema, numPagesSchema);
 
 	BM_BufferPool *bm = malloc(sizeof(BM_BufferPool));
 	initBufferPool(bm, name, 10, RS_FIFO, NULL);
 
-	rel->mgmtData = bm;
+	TableHandle *tableHandle = malloc(sizeof(TableHandle));
+	tableHandle->bm = bm;
+	tableHandle->pageCap = calculatePageCap(schema);
+	tableHandle->numPagesSchema = *numPagesSchema;
+
+	rel->name = name;
+	rel->schema = schema;
+	rel->mgmtData = tableHandle;
 	// LLAMAMOS A INITBUFFERPOOL?
 	// QUIEN DECIDE STRATEGY?
 	//   "      "    NUMPAGES?
@@ -46,7 +62,8 @@ RC openTable (RM_TableData *rel, char *name){
 RC closeTable (RM_TableData *rel){
 	//TODO: UPDATE INFO: FREE SPACE
 	//TODO: CALL BUFFER TO FINISH
-	shutdownBufferPool(rel->mgmtData);
+	TableHandle *tableHandle = rel->mgmtData;
+	shutdownBufferPool(tableHandle->bm);
 	return RC_OK;
 }
 RC deleteTable (char *name){
@@ -56,14 +73,34 @@ RC deleteTable (char *name){
 }
 int getNumTuples (RM_TableData *rel){
 	//TODO: 3/10
+	TableHandle *tableHandle = rel->mgmtData;
 	return 0;
 }
 
 // handling records in a table
 RC insertRecord (RM_TableData *rel, Record *record){
-	//TODO: 4/10
-	//Buscamos posicion de insercion
-	//Escribimos
+	//TODO: Busqueda de pagina
+	int page = 1;
+	int recordSize = getRecordSize(rel->schema);
+	TableHandle *tableHandle = rel->mgmtData;
+	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
+	pinPage (tableHandle->bm, pageHandle, page);
+	int i = 0;
+	char full = 0x01;
+	while(((pageHandle->data[i*sizeof(char)]) == 0x01) && i < tableHandle->pageCap){
+		i++;
+	}
+	if(i != tableHandle->pageCap){
+		pageHandle->data[i*sizeof(char)] = 0x01;
+		int offset = tableHandle->pageCap * sizeof(char) + i*recordSize;
+		pageHandle->data[offset] = page;
+		offset += sizeof(int);
+		pageHandle->data[offset] = i;
+		offset += sizeof(int);
+		memcpy(pageHandle->data + offset, record->data, recordSize);
+		markDirty(tableHandle->bm, pageHandle);
+		unpinPage (tableHandle->bm, pageHandle);
+	}
 	return RC_OK;
 }
 RC deleteRecord (RM_TableData *rel, RID id){
@@ -130,15 +167,21 @@ RC freeSchema (Schema *schema){
 
 // dealing with records and attribute values
 RC createRecord (Record **record, Schema *schema){
+	//TODO
+	// PORQUE ES UN DOBLE PUNTERO ??
 	return RC_OK;
 }
 RC freeRecord (Record *record){
+	// TODO
+	// QUE HACE ESTO
 	return RC_OK;
 }
 RC getAttr (Record *record, Schema *schema, int attrNum, Value **value){
+	//TODO: 2/10
 	return RC_OK;
 }
 RC setAttr (Record *record, Schema *schema, int attrNum, Value *value){
+	//TODO: 2/10
 	return RC_OK;
 }
 
@@ -173,12 +216,12 @@ int writeTableInfo(char *name, Schema *schema){
   	fclose(file);
 }
 
-Schema *readSchema(char *name){
+void readSchema(char *name, Schema *schema, int *numPagesSchema){
   	FILE *file = fopen(name, "r+");
   	// Reserve space for header size
   	// sizeof(short) for tableInfoSize
-  	fseek(file, sizeof(SM_FileHeader) + sizeof(short), SEEK_SET);
-  	Schema *schema = malloc(sizeof(Schema));
+  	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
+  	fread(numPagesSchema, sizeof(short), 1, file);
 
   	fread(&(schema->numAttr), sizeof(int), 1, file);
   	schema->attrNames = malloc(schema->numAttr * sizeof(char*));
@@ -196,8 +239,7 @@ Schema *readSchema(char *name){
   	schema->keyAttrs = malloc(sizeof(int) * schema->keySize);
 	fread(schema->keyAttrs, sizeof(int), schema->keySize, file);
   	fclose(file);
-
-  	return schema;
+  	return;
 }
 
 short getNumPagesSchema(char *name){
@@ -206,6 +248,11 @@ short getNumPagesSchema(char *name){
   	short tableInfoSize;
   	fread(&tableInfoSize, sizeof(short), 1, file);
   	return tableInfoSize;
+}
+
+int calculatePageCap(Schema *schema){
+	int recordSize = getRecordSize(schema) + (int)sizeof(RID);
+	int numRecords = PAGE_SIZE/(sizeof(char) + recordSize);
 }
 
 void printSchema(Schema *schema){
@@ -228,3 +275,6 @@ void printSchema(Schema *schema){
   	}
 	printf("keySize: %i\n", schema->keySize);
 }
+
+
+
