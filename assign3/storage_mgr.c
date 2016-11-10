@@ -10,11 +10,6 @@ extern int errno;
 
 RC updateCurrentInformation(int totalNumPages, int curPagePos, SM_FileHandle *fHandle);
 
-typedef struct SM_FileHeader {
-  int totalNumPages;
-  int curPagePos;
-} SM_FileHeader;
-
 void initStorageManager(){
 
 };

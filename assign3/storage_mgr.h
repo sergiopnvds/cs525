@@ -3,6 +3,11 @@
 
 #include "dberror.h"
 
+typedef struct SM_FileHeader {
+  int totalNumPages;
+  int curPagePos;
+} SM_FileHeader;
+
 /************************************************************
  *                    handle data structures                *
  ************************************************************/
