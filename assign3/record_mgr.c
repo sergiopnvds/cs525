@@ -8,9 +8,6 @@
 #include "expr.h"
 #include "tables.h"
 
-
-int writeTableInfo(char *name, Schema *schema);
-void readSchema(char *name, Schema *schema, int *numPagesSchema);
 short getNumPagesSchema(char *name);
 int calculatePageCap(Schema *schema);
 
@@ -21,6 +18,8 @@ typedef struct TableHandle
   BM_BufferPool *bm;
   int pageCap;
   int numPagesSchema;
+  int recordSize;
+  short freeSpacePage;
 } TableHandle;
 
 // table and manager
@@ -35,21 +34,68 @@ RC createTable (char *name, Schema *schema){
 	if(createStatus != RC_OK){
 		return createStatus;
 	}
-    writeTableInfo(name, schema);
+	//Open file to read
+  	FILE *file = fopen(name, "r+");
+  	// We already have management data for storage manager stored
+  	fseek(file, sizeof(SM_FileHeader) + 2*sizeof(short), SEEK_SET);
+  	// Write number of attributes
+  	fwrite(&(schema->numAttr), sizeof(int), 1, file);
+  	// Write each string preceded by its lenght
+  	for(int i = 0; i < schema->numAttr; i++){
+  		short attrlen = (short)strlen(schema->attrNames[i]);
+  		fwrite(&attrlen, sizeof(short), 1, file);
+  		fwrite(schema->attrNames[i], sizeof(char), attrlen, file);
+  	}
+  	// writes 
+	fwrite(schema->dataTypes, sizeof(int), schema->numAttr, file);
+	fwrite(schema->typeLength, sizeof(int), schema->numAttr, file);
+  	fwrite(&(schema->keySize), sizeof(int), 1, file);
+	fwrite(schema->keyAttrs, sizeof(int), schema->keySize, file);
+
+	long schemaSize = ftell(file) - sizeof(SM_FileHeader);
+
+	short numPagesSchema = schemaSize/PAGE_SIZE + 1;
+	short freeSpacePage = numPagesSchema;
+  	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
+	fwrite(&numPagesSchema, sizeof(short), 1, file);
+	fwrite(&freeSpacePage, sizeof(short), 1, file);
+
+  	fclose(file);
+
 	return RC_OK;
 }
 RC openTable (RM_TableData *rel, char *name){
-	int *numPagesSchema = malloc(sizeof(int));
-	Schema *schema = malloc(sizeof(Schema));
-	readSchema(name, schema, numPagesSchema);
-
-	BM_BufferPool *bm = malloc(sizeof(BM_BufferPool));
-	initBufferPool(bm, name, 10, RS_FIFO, NULL);
-
 	TableHandle *tableHandle = malloc(sizeof(TableHandle));
+	Schema *schema = malloc(sizeof(Schema));
+	BM_BufferPool *bm = malloc(sizeof(BM_BufferPool));
+  	FILE *file = fopen(name, "r+");
+  	// Reserve space for header size
+  	// sizeof(short) for tableInfoSize
+  	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
+  	fread(&(tableHandle->numPagesSchema), sizeof(short), 1, file);
+  	fread(&(tableHandle->freeSpacePage), sizeof(short), 1, file);
+
+  	fread(&(schema->numAttr), sizeof(int), 1, file);
+  	schema->attrNames = malloc(schema->numAttr * sizeof(char*));
+  	for(int i = 0; i < schema->numAttr;  i++){
+  		short attrNameLen = 0;
+  		fread(&attrNameLen, sizeof(short), 1, file);
+  		schema->attrNames[i] = malloc(attrNameLen);
+  		fread(schema->attrNames[i], attrNameLen, 1, file);
+  	}
+  	schema->dataTypes = malloc(sizeof(int) * schema->numAttr);
+	fread(schema->dataTypes, sizeof(int), schema->numAttr, file);
+  	schema->typeLength = malloc(sizeof(int) * schema->numAttr);
+	fread(schema->typeLength, sizeof(int), schema->numAttr, file);
+  	fread(&(schema->keySize), sizeof(int), 1, file);
+  	schema->keyAttrs = malloc(sizeof(int) * schema->keySize);
+	fread(schema->keyAttrs, sizeof(int), schema->keySize, file);
+  	fclose(file);
+
+	initBufferPool(bm, name, 10, RS_FIFO, NULL);
 	tableHandle->bm = bm;
 	tableHandle->pageCap = calculatePageCap(schema);
-	tableHandle->numPagesSchema = *numPagesSchema;
+	tableHandle->recordSize = getRecordSize(schema);
 
 	rel->name = name;
 	rel->schema = schema;
@@ -80,32 +126,79 @@ int getNumTuples (RM_TableData *rel){
 // handling records in a table
 RC insertRecord (RM_TableData *rel, Record *record){
 	//TODO: Busqueda de pagina
-	int page = 1;
-	int recordSize = getRecordSize(rel->schema);
+	// TEMPORAL
 	TableHandle *tableHandle = rel->mgmtData;
 	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
+	//READ PAGE FROM DISK IF IS NOT ALREADY IN BUFFER
+	int page = tableHandle->freeSpacePage;
 	pinPage (tableHandle->bm, pageHandle, page);
-	int i = 0;
-	char full = 0x01;
-	while(((pageHandle->data[i*sizeof(char)]) == 0x01) && i < tableHandle->pageCap){
-		i++;
-	}
-	if(i != tableHandle->pageCap){
-		pageHandle->data[i*sizeof(char)] = 0x01;
-		int offset = tableHandle->pageCap * sizeof(char) + i*recordSize;
-		pageHandle->data[offset] = page;
-		offset += sizeof(int);
-		pageHandle->data[offset] = i;
-		offset += sizeof(int);
-		memcpy(pageHandle->data + offset, record->data, recordSize);
-		markDirty(tableHandle->bm, pageHandle);
+	//LOOK FOR FREE SLOT
+	int freeSlot = pageHandle->data[0];
+	char *data = pageHandle->data + sizeof(int);
+	// int freeSlot = 0;
+	// char full = 0x01;
+	// while(((pageHandle->data[freeSlot*sizeof(char)]) == 0x01) && freeSlot < tableHandle->pageCap){
+	// 	freeSlot++;
+	// }
+	if(freeSlot >= 0){
+		data[freeSlot*sizeof(char)] = 0x01; //SET SLOT TO FULL
+		int recordOffset = tableHandle->pageCap*sizeof(char) + freeSlot*(tableHandle->recordSize+sizeof(RID));
+		data[recordOffset] = page;
+		recordOffset += sizeof(int);
+		data[recordOffset] = freeSlot;
+		recordOffset += sizeof(int);
+		(record->id).page = page;
+		(record->id).slot = freeSlot;
+		// WRITE RECORD DATA
+		memcpy(data + recordOffset, record->data, tableHandle->recordSize);
+		// BUFFER MANAGER OPERATIONS
+	}else{
+		//FULL PAGE
+		tableHandle->freeSpacePage++;
 		unpinPage (tableHandle->bm, pageHandle);
+		pinPage(tableHandle->bm, pageHandle, 0);
+		pageHandle->data[sizeof(SM_FileHeader) + sizeof(short)] = tableHandle->freeSpacePage;
+		markDirty(tableHandle->bm, pageHandle);
+		unpinPage(tableHandle->bm, pageHandle);
+		return insertRecord(rel, record);
 	}
+	int newFreeSlot = freeSlot;
+	char full = 0x01;
+	while(((data[newFreeSlot*sizeof(char)]) == 0x01) && newFreeSlot < tableHandle->pageCap){
+		newFreeSlot++;
+	}
+	if(newFreeSlot < tableHandle->pageCap){
+		pageHandle->data[0] = newFreeSlot;
+	}else{
+		pageHandle->data[0] = -1;
+	}
+	markDirty(tableHandle->bm, pageHandle);
+	unpinPage (tableHandle->bm, pageHandle);
 	return RC_OK;
 }
 RC deleteRecord (RM_TableData *rel, RID id){
-	//TODO: 4/10
-	// Que hacer con el espacio libre.
+	TableHandle *tableHandle = rel->mgmtData;
+	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
+	pinPage (tableHandle->bm, pageHandle, id.page);
+	// SET TO EMPTY IN HEADER DIRECTORY
+	pageHandle->data[sizeof(int) + id.slot*sizeof(char)] = 0x00;
+	// I THINK THIS IS OPTIONAL
+	int recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID));
+	memset(pageHandle->data + recordOffset,0,tableHandle->recordSize + sizeof(RID)); // Set record to 0
+	// BUFFER MANAGER OPERATIONS
+	if(pageHandle->data[0] > id.slot || pageHandle->data[0] == -1){
+		pageHandle->data[0] = id.slot;
+	}
+	markDirty(tableHandle->bm, pageHandle);
+	unpinPage (tableHandle->bm, pageHandle);
+	if(id.page < tableHandle->freeSpacePage){
+		tableHandle->freeSpacePage = id.page;
+		pinPage(tableHandle->bm, pageHandle, 0);
+		pageHandle->data[sizeof(SM_FileHeader) + sizeof(short)] = tableHandle->freeSpacePage;
+		markDirty(tableHandle->bm, pageHandle);
+		unpinPage(tableHandle->bm, pageHandle);
+	}
+	// GESTION DE ERRORES? SI NO HAY RECORD EN ESA UBICACION?
 	return RC_OK;
 }
 RC updateRecord (RM_TableData *rel, Record *record){
@@ -187,61 +280,6 @@ RC setAttr (Record *record, Schema *schema, int attrNum, Value *value){
 
 // Auxiliary functions
 
-int writeTableInfo(char *name, Schema *schema){
-	//Open file to read
-  	FILE *file = fopen(name, "r+");
-  	// We already have management data for storage manager stored
-  	fseek(file, sizeof(SM_FileHeader) + sizeof(short), SEEK_SET);
-  	// Write number of attributes
-  	fwrite(&(schema->numAttr), sizeof(int), 1, file);
-  	// Write each string preceded by its lenght
-  	for(int i = 0; i < schema->numAttr; i++){
-  		short attrlen = (short)strlen(schema->attrNames[i]);
-  		fwrite(&attrlen, sizeof(short), 1, file);
-  		fwrite(schema->attrNames[i], sizeof(char), attrlen, file);
-  	}
-  	// writes 
-	fwrite(schema->dataTypes, sizeof(int), schema->numAttr, file);
-	fwrite(schema->typeLength, sizeof(int), schema->numAttr, file);
-  	fwrite(&(schema->keySize), sizeof(int), 1, file);
-	fwrite(schema->keyAttrs, sizeof(int), schema->keySize, file);
-
-	long schemaSize = ftell(file) - sizeof(SM_FileHeader);
-
-	short numPagesSchema = schemaSize/PAGE_SIZE + 1;
-
-  	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
-	fwrite(&numPagesSchema, sizeof(short), 1, file);
-
-  	fclose(file);
-}
-
-void readSchema(char *name, Schema *schema, int *numPagesSchema){
-  	FILE *file = fopen(name, "r+");
-  	// Reserve space for header size
-  	// sizeof(short) for tableInfoSize
-  	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
-  	fread(numPagesSchema, sizeof(short), 1, file);
-
-  	fread(&(schema->numAttr), sizeof(int), 1, file);
-  	schema->attrNames = malloc(schema->numAttr * sizeof(char*));
-  	for(int i = 0; i < schema->numAttr;  i++){
-  		short attrNameLen = 0;
-  		fread(&attrNameLen, sizeof(short), 1, file);
-  		schema->attrNames[i] = malloc(attrNameLen);
-  		fread(schema->attrNames[i], attrNameLen, 1, file);
-  	}
-  	schema->dataTypes = malloc(sizeof(int) * schema->numAttr);
-	fread(schema->dataTypes, sizeof(int), schema->numAttr, file);
-  	schema->typeLength = malloc(sizeof(int) * schema->numAttr);
-	fread(schema->typeLength, sizeof(int), schema->numAttr, file);
-  	fread(&(schema->keySize), sizeof(int), 1, file);
-  	schema->keyAttrs = malloc(sizeof(int) * schema->keySize);
-	fread(schema->keyAttrs, sizeof(int), schema->keySize, file);
-  	fclose(file);
-  	return;
-}
-
 short getNumPagesSchema(char *name){
   	FILE *file = fopen(name, "r+");
   	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
@@ -252,7 +290,8 @@ short getNumPagesSchema(char *name){
 
 int calculatePageCap(Schema *schema){
 	int recordSize = getRecordSize(schema) + (int)sizeof(RID);
-	int numRecords = PAGE_SIZE/(sizeof(char) + recordSize);
+	// -1 is for free slot pointer
+	int numRecords = (PAGE_SIZE - 1)/(sizeof(char) + recordSize);
 }
 
 void printSchema(Schema *schema){
