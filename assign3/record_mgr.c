@@ -13,7 +13,6 @@
 short getNumPagesSchema(char *name);
 int calculatePageCap(Schema *schema);
 int getAttrOffset(Schema *schema, int attrNum);
-void printSchema(Schema *schema);
 
 typedef struct TableHandle
 {
@@ -392,26 +391,6 @@ int calculatePageCap(Schema *schema){
 	numRecords = (PAGE_SIZE - 1)/(sizeof(char) + recordSize);
 }
 
-void printSchema(Schema *schema){
-	printf("numAttr: %i\n", schema->numAttr);
-	printf("attrNames: \n");
-  	for(int i = 0; i < schema->numAttr; i++){
-  		printf("\t%s\n", schema->attrNames[i]);
-  	}
-	printf("dataTypes: \n");
-  	for(int i = 0; i < schema->numAttr; i++){
-  		printf("\t%i\n", schema->dataTypes[i]);
-  	}
-	printf("typeLength: \n");
-  	for(int i = 0; i < schema->numAttr; i++){
-  		printf("\t%i\n", schema->typeLength[i]);
-  	}
-	printf("keyAttrs: \n");
-  	for(int i = 0; i < schema->keySize; i++){
-  		printf("\t%i\n", schema->keyAttrs[i]);
-  	}
-	printf("keySize: %i\n", schema->keySize);
-}
 
 
 
