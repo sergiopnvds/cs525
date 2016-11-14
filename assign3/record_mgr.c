@@ -8,9 +8,11 @@
 #include "expr.h"
 #include "tables.h"
 
+#define FULL_SLOT 0x01
+
 short getNumPagesSchema(char *name);
 int calculatePageCap(Schema *schema);
-
+int getAttrOffset(Schema *schema, int attrNum);
 void printSchema(Schema *schema);
 
 typedef struct TableHandle
@@ -109,7 +111,9 @@ RC closeTable (RM_TableData *rel){
 	//TODO: UPDATE INFO: FREE SPACE
 	//TODO: CALL BUFFER TO FINISH
 	TableHandle *tableHandle = rel->mgmtData;
+	freeSchema(rel->schema);
 	shutdownBufferPool(tableHandle->bm);
+	free(tableHandle);
 	return RC_OK;
 }
 RC deleteTable (char *name){
@@ -126,32 +130,27 @@ int getNumTuples (RM_TableData *rel){
 
 // handling records in a table
 RC insertRecord (RM_TableData *rel, Record *record){
-	//TODO: Busqueda de pagina
-	// TEMPORAL
+	int page, freeSlot, newFreeSlot, recordOffset;
+	char *pageData;
 	TableHandle *tableHandle = rel->mgmtData;
 	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
 	//READ PAGE FROM DISK IF IS NOT ALREADY IN BUFFER
-	int page = tableHandle->freeSpacePage;
-	pinPage (tableHandle->bm, pageHandle, page);
+	page = tableHandle->freeSpacePage;
+	pinPage(tableHandle->bm, pageHandle, page);
 	//LOOK FOR FREE SLOT
-	int freeSlot = pageHandle->data[0];
-	char *data = pageHandle->data + sizeof(int);
-	// int freeSlot = 0;
-	// char full = 0x01;
-	// while(((pageHandle->data[freeSlot*sizeof(char)]) == 0x01) && freeSlot < tableHandle->pageCap){
-	// 	freeSlot++;
-	// }
+	freeSlot = pageHandle->data[0];
+	pageData = pageHandle->data + sizeof(int);
 	if(freeSlot >= 0){
-		data[freeSlot*sizeof(char)] = 0x01; //SET SLOT TO FULL
-		int recordOffset = tableHandle->pageCap*sizeof(char) + freeSlot*(tableHandle->recordSize+sizeof(RID));
-		data[recordOffset] = page;
+		pageData[freeSlot*sizeof(char)] = FULL_SLOT; //SET SLOT TO FULL
+		recordOffset = tableHandle->pageCap*sizeof(char) + freeSlot*(tableHandle->recordSize+sizeof(RID));
+		pageData[recordOffset] = page;
 		recordOffset += sizeof(int);
-		data[recordOffset] = freeSlot;
+		pageData[recordOffset] = freeSlot;
 		recordOffset += sizeof(int);
 		(record->id).page = page;
 		(record->id).slot = freeSlot;
 		// WRITE RECORD DATA
-		memcpy(data + recordOffset, record->data, tableHandle->recordSize);
+		memcpy(pageData + recordOffset, record->data, tableHandle->recordSize);
 		// BUFFER MANAGER OPERATIONS
 	}else{
 		//FULL PAGE
@@ -163,9 +162,8 @@ RC insertRecord (RM_TableData *rel, Record *record){
 		unpinPage(tableHandle->bm, pageHandle);
 		return insertRecord(rel, record);
 	}
-	int newFreeSlot = freeSlot;
-	char full = 0x01;
-	while(((data[newFreeSlot*sizeof(char)]) == 0x01) && newFreeSlot < tableHandle->pageCap){
+	newFreeSlot = freeSlot;
+	while(((pageData[newFreeSlot*sizeof(char)]) == FULL_SLOT) && newFreeSlot < tableHandle->pageCap){
 		newFreeSlot++;
 	}
 	if(newFreeSlot < tableHandle->pageCap){
@@ -178,13 +176,14 @@ RC insertRecord (RM_TableData *rel, Record *record){
 	return RC_OK;
 }
 RC deleteRecord (RM_TableData *rel, RID id){
+	int recordOffset;
 	TableHandle *tableHandle = rel->mgmtData;
 	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
 	pinPage (tableHandle->bm, pageHandle, id.page);
 	// SET TO EMPTY IN HEADER DIRECTORY
 	pageHandle->data[sizeof(int) + id.slot*sizeof(char)] = 0x00;
 	// I THINK THIS IS OPTIONAL
-	int recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID));
+	recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID));
 	memset(pageHandle->data + recordOffset,0,tableHandle->recordSize + sizeof(RID)); // Set record to 0
 	// BUFFER MANAGER OPERATIONS
 	if(pageHandle->data[0] > id.slot || pageHandle->data[0] == -1){
@@ -203,12 +202,13 @@ RC deleteRecord (RM_TableData *rel, RID id){
 	return RC_OK;
 }
 RC updateRecord (RM_TableData *rel, Record *record){
+	int recordOffset;
+	RID id;
 	TableHandle *tableHandle = rel->mgmtData;
 	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
-	RID id = record->id;
+	id = record->id;
 	pinPage (tableHandle->bm, pageHandle, id.page);
-	int recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID)) + sizeof(RID);
-	printf("record offset %i\n", recordOffset);
+	recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID)) + sizeof(RID);
 	memcpy(pageHandle->data + recordOffset, record->data, tableHandle->recordSize);
 	markDirty(tableHandle->bm, pageHandle);
 	unpinPage(tableHandle->bm, pageHandle);
@@ -216,11 +216,11 @@ RC updateRecord (RM_TableData *rel, Record *record){
 	return RC_OK;
 }
 RC getRecord (RM_TableData *rel, RID id, Record *record){
+	int recordOffset;
 	TableHandle *tableHandle = rel->mgmtData;
 	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
 	pinPage (tableHandle->bm, pageHandle, id.page);
-	int recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID)) + sizeof(RID);
-	printf("%i\n", recordOffset);
+	recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID)) + sizeof(RID);
 	char *data = malloc(tableHandle->recordSize);
 	memcpy(data, pageHandle->data + recordOffset, tableHandle->recordSize);
 	unpinPage(tableHandle->bm, pageHandle);
@@ -244,7 +244,7 @@ RC closeScan (RM_ScanHandle *scan){
 // dealing with schemas
 int getRecordSize (Schema *schema){
 	int recordSize = 0;
-	for(int i = 0; i < schema->numAttr; i++){
+	for(int i = 0; i < schema->numAttr && recordSize != RC_RM_UNKOWN_DATATYPE; i++){
 		switch(schema->dataTypes[i]){
 		  case DT_INT: 
 		  	recordSize += sizeof(int);
@@ -258,6 +258,8 @@ int getRecordSize (Schema *schema){
 		  case DT_BOOL: 
 		  	recordSize += sizeof(bool);
 		  	break;
+		  default: 
+		  	recordSize = RC_RM_UNKOWN_DATATYPE;
 		}
 	}
 	return recordSize;
@@ -273,31 +275,107 @@ Schema *createSchema (int numAttr, char **attrNames, DataType *dataTypes, int *t
 	return newSchema;
 }
 RC freeSchema (Schema *schema){
-	//TODO: QUE HACE ESTO?
+	free(schema->attrNames);
+	free(schema->dataTypes);
+	free(schema->typeLength);
+	free(schema->keyAttrs);
+	free(schema);
 	return RC_OK;
 }
 
 // dealing with records and attribute values
 RC createRecord (Record **record, Schema *schema){
-	//TODO
-	// PORQUE ES UN DOBLE PUNTERO ??
-	return RC_OK;
-}
-RC freeRecord (Record *record){
-	// TODO
-	// QUE HACE ESTO
-	return RC_OK;
-}
-RC getAttr (Record *record, Schema *schema, int attrNum, Value **value){
-	//TODO: 2/10
-	return RC_OK;
-}
-RC setAttr (Record *record, Schema *schema, int attrNum, Value *value){
-	//TODO: 2/10
+	*record = malloc(sizeof(Record));
+	(*record)->data = calloc(1, getRecordSize(schema));
 	return RC_OK;
 }
 
+RC freeRecord (Record *record){
+	free(record->data);
+	free(record);
+	return RC_OK;
+}
+RC getAttr (Record *record, Schema *schema, int attrNum, Value **value){
+	int attrOffset;
+	RC code = RC_OK;
+	if((attrOffset = getAttrOffset(schema, attrNum)) >= 0){
+		switch(schema->dataTypes[attrNum]){
+		  case DT_INT: 
+			*value = malloc(sizeof(DataType) + sizeof(int));
+			memcpy(&((*value)->v.intV),record->data + attrOffset, sizeof(int));
+		  	break;
+		  case DT_STRING:
+			*value = malloc(sizeof(DataType) + schema->typeLength[attrNum] + 1);
+			memcpy((*value)->v.stringV,record->data + attrOffset, schema->typeLength[attrNum]);
+			// Adds end of string
+			(*value)->v.stringV[schema->typeLength[attrNum]] = 0x00;
+		  	break;
+		  case DT_FLOAT:
+			*value = malloc(sizeof(DataType) + sizeof(float));
+			memcpy(&((*value)->v.floatV),record->data + attrOffset, sizeof(float));
+		  	break;
+		  case DT_BOOL:
+			*value = malloc(sizeof(DataType) + sizeof(bool));
+			memcpy(&((*value)->v.boolV),record->data + attrOffset, sizeof(bool));
+		  	break;
+		  default: 
+			code = RC_RM_UNKOWN_DATATYPE;
+		}
+	}else{
+		code = RC_RM_UNKOWN_DATATYPE;
+	}
+	return code;
+}
+RC setAttr (Record *record, Schema *schema, int attrNum, Value *value){
+	int attrOffset;
+	RC code = RC_OK;
+	if((attrOffset = getAttrOffset(schema, attrNum)) >= 0){
+		switch(schema->dataTypes[attrNum]){
+			case DT_INT:
+				memcpy(record->data + attrOffset, &(value->v.intV), sizeof(int));
+				break;
+			case DT_STRING: 
+				memcpy(record->data + attrOffset, value->v.stringV, strlen(value->v.stringV));
+				break;
+			case DT_FLOAT:  
+				memcpy(record->data + attrOffset, &(value->v.floatV), sizeof(float));
+				break;
+			case DT_BOOL:  
+				memcpy(record->data + attrOffset, &(value->v.boolV), sizeof(bool));
+				break;
+			default: 
+				code = RC_RM_UNKOWN_DATATYPE;
+		}
+	}else{
+		code = RC_RM_UNKOWN_DATATYPE;
+	}
+	return code;
+}
+
 // Auxiliary functions
+
+int getAttrOffset(Schema *schema, int attrNum){
+	int attrOffset = 0;
+	for(int i = 0; i < attrNum && attrOffset >= 0; i++){
+		switch(schema->dataTypes[i]){
+		  case DT_INT: 
+		  	attrOffset += sizeof(int);
+		  	break;
+		  case DT_STRING: 
+		  	attrOffset += schema->typeLength[i];
+		  	break;
+		  case DT_FLOAT: 
+		  	attrOffset += sizeof(float);
+		  	break;
+		  case DT_BOOL: 
+		  	attrOffset += sizeof(bool);
+		  	break;
+		  default: 
+		  	attrOffset = -1;
+		}
+	}
+	return attrOffset;
+}
 
 short getNumPagesSchema(char *name){
   	FILE *file = fopen(name, "r+");
@@ -308,9 +386,10 @@ short getNumPagesSchema(char *name){
 }
 
 int calculatePageCap(Schema *schema){
-	int recordSize = getRecordSize(schema) + (int)sizeof(RID);
+	int recordSize, numRecords;
+	recordSize = getRecordSize(schema) + (int)sizeof(RID);
 	// -1 is for free slot pointer
-	int numRecords = (PAGE_SIZE - 1)/(sizeof(char) + recordSize);
+	numRecords = (PAGE_SIZE - 1)/(sizeof(char) + recordSize);
 }
 
 void printSchema(Schema *schema){

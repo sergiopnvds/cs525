@@ -13,46 +13,37 @@ main (void)
 
   char *attrNames[3] = {"id","name","age"};
   DataType dataTypes[3] = {DT_INT, DT_STRING, DT_INT};
-  int typeLength[3] = {4,255,4};
+  int typeLength[3] = {0,10,0};
   int keyAttrs[2] = {0, 2};
   Schema *people = createSchema(3, attrNames, dataTypes, typeLength, 2, keyAttrs);
 
-  createTable("prueba1", people);
+  createTable("people", people);
   RM_TableData *rel = malloc(sizeof(RM_TableData));
-  openTable(rel, "prueba1");
-  Record *record = malloc(sizeof(Record));
-  record->data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-  insertRecord(rel, record);
-  deleteRecord(rel, record->id);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  insertRecord(rel, record);
-  Record *record2 = malloc(sizeof(Record));
-  (record2->id).page = 1;
-  (record2->id).slot = 12;
-  deleteRecord(rel, record2->id);
-  record2->data = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-  insertRecord(rel, record2);
-  insertRecord(rel, record2);
-  Record *record3 = malloc(sizeof(Record));
-  (record3->id).page = 1;
-  (record3->id).slot = 10;
-  deleteRecord(rel, record3->id);
-  record3->data = "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc";
-  insertRecord(rel, record3);
-  insertRecord(rel, record3);
+  openTable(rel, "people");
+  Value *value1 = malloc(sizeof(Value));
+  value1->dt = DT_INT;
+  value1->v.intV = 5;
+  Value *value2 = malloc(sizeof(Value));
+  value2->dt = DT_STRING;
+  value2->v.stringV = "123";
+  Value *value3 = malloc(sizeof(Value));
+  value3->dt = DT_FLOAT;
+  value3->v.intV = 5;
+  Record *record6;
+  createRecord(&record6, people);
+  setAttr(record6, people, 0, value1);
+  setAttr(record6, people, 2, value3);
+  setAttr(record6, people, 1, value2);
+  insertRecord(rel,record6);
+  Record *record7;
+  createRecord(&record7, people);
+  getRecord(rel,record6->id,record7);
+  Value *value5;
+  getAttr(record7, people, 1, &value5);
+  printf("%s\n", value5->v.stringV);
   closeTable(rel);
   return 0;
 }
+
+
+
