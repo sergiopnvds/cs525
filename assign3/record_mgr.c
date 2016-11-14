@@ -119,6 +119,7 @@ RC deleteTable (char *name){
 }
 int getNumTuples (RM_TableData *rel){
 	//TODO: 3/10
+	// CONTAMOS O MANTENEMOS UN CONTADOR?
 	TableHandle *tableHandle = rel->mgmtData;
 	return 0;
 }
@@ -202,12 +203,30 @@ RC deleteRecord (RM_TableData *rel, RID id){
 	return RC_OK;
 }
 RC updateRecord (RM_TableData *rel, Record *record){
-	//TODO: 4/10
-	//Encontramos record
+	TableHandle *tableHandle = rel->mgmtData;
+	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
+	RID id = record->id;
+	pinPage (tableHandle->bm, pageHandle, id.page);
+	int recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID)) + sizeof(RID);
+	printf("record offset %i\n", recordOffset);
+	memcpy(pageHandle->data + recordOffset, record->data, tableHandle->recordSize);
+	markDirty(tableHandle->bm, pageHandle);
+	unpinPage(tableHandle->bm, pageHandle);
+	// GESTION DE ERRORES? SI NO HAY RECORD EN ESA UBICACION?
 	return RC_OK;
 }
 RC getRecord (RM_TableData *rel, RID id, Record *record){
-	//TODO: 4/10
+	TableHandle *tableHandle = rel->mgmtData;
+	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
+	pinPage (tableHandle->bm, pageHandle, id.page);
+	int recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID)) + sizeof(RID);
+	printf("%i\n", recordOffset);
+	char *data = malloc(tableHandle->recordSize);
+	memcpy(data, pageHandle->data + recordOffset, tableHandle->recordSize);
+	unpinPage(tableHandle->bm, pageHandle);
+	record->id = id;
+	record->data = data;
+	// GESTION DE ERRORES? SI NO HAY RECORD EN ESA UBICACION?
 	return RC_OK;
 }
 
