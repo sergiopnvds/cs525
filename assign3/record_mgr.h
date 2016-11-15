@@ -43,4 +43,22 @@ extern RC freeRecord (Record *record);
 extern RC getAttr (Record *record, Schema *schema, int attrNum, Value **value);
 extern RC setAttr (Record *record, Schema *schema, int attrNum, Value *value);
 
+//DEFINED BY US
+typedef struct TableHandle
+{
+  BM_BufferPool *bm;
+  int pageCap;
+  int numPagesSchema;
+  int recordSize;
+  short freeSpacePage;
+} TableHandle;
+// Auxiliary functions
+
+short getNumPagesSchema(char *name);
+int calculatePageCap(Schema *schema);
+int getAttrOffset(Schema *schema, int attrNum);
+
+// Auxiliary value definition
+#define FULL_SLOT 0x01
+
 #endif // RECORD_MGR_H

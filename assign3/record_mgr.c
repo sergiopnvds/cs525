@@ -8,21 +8,6 @@
 #include "expr.h"
 #include "tables.h"
 
-#define FULL_SLOT 0x01
-
-short getNumPagesSchema(char *name);
-int calculatePageCap(Schema *schema);
-int getAttrOffset(Schema *schema, int attrNum);
-
-typedef struct TableHandle
-{
-  BM_BufferPool *bm;
-  int pageCap;
-  int numPagesSchema;
-  int recordSize;
-  short freeSpacePage;
-} TableHandle;
-
 // table and manager
 RC initRecordManager (void *mgmtData){
 	return RC_OK;
@@ -93,7 +78,7 @@ RC openTable (RM_TableData *rel, char *name){
 	fread(schema->keyAttrs, sizeof(int), schema->keySize, file);
   	fclose(file);
 
-	initBufferPool(bm, name, 10, RS_FIFO, NULL);
+	initBufferPool(bm, name, 200, RS_LRU, NULL);
 	tableHandle->bm = bm;
 	tableHandle->pageCap = calculatePageCap(schema);
 	tableHandle->recordSize = getRecordSize(schema);
@@ -129,7 +114,8 @@ int getNumTuples (RM_TableData *rel){
 
 // handling records in a table
 RC insertRecord (RM_TableData *rel, Record *record){
-	int page, freeSlot, newFreeSlot, recordOffset;
+	int page, newFreeSlot, recordOffset;
+	int *freeSlot;
 	char *pageData;
 	TableHandle *tableHandle = rel->mgmtData;
 	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
@@ -137,18 +123,17 @@ RC insertRecord (RM_TableData *rel, Record *record){
 	page = tableHandle->freeSpacePage;
 	pinPage(tableHandle->bm, pageHandle, page);
 	//LOOK FOR FREE SLOT
-	freeSlot = pageHandle->data[0];
+	freeSlot = (int *)pageHandle->data;
 	pageData = pageHandle->data + sizeof(int);
-	if(freeSlot >= 0){
-		pageData[freeSlot*sizeof(char)] = FULL_SLOT; //SET SLOT TO FULL
-		recordOffset = tableHandle->pageCap*sizeof(char) + freeSlot*(tableHandle->recordSize+sizeof(RID));
-		pageData[recordOffset] = page;
+	if(*freeSlot >= 0){
+		pageData[*freeSlot*sizeof(char)] = FULL_SLOT; //SET SLOT TO FULL
+		recordOffset = tableHandle->pageCap*sizeof(char) + *freeSlot*(tableHandle->recordSize+sizeof(RID));
+		memcpy(pageData + recordOffset, &page, sizeof(int));
 		recordOffset += sizeof(int);
-		pageData[recordOffset] = freeSlot;
+		memcpy(pageData + recordOffset, freeSlot, sizeof(int));
 		recordOffset += sizeof(int);
 		(record->id).page = page;
-		(record->id).slot = freeSlot;
-		// WRITE RECORD DATA
+		(record->id).slot = *freeSlot;
 		memcpy(pageData + recordOffset, record->data, tableHandle->recordSize);
 		// BUFFER MANAGER OPERATIONS
 	}else{
@@ -156,19 +141,21 @@ RC insertRecord (RM_TableData *rel, Record *record){
 		tableHandle->freeSpacePage++;
 		unpinPage (tableHandle->bm, pageHandle);
 		pinPage(tableHandle->bm, pageHandle, 0);
-		pageHandle->data[sizeof(SM_FileHeader) + sizeof(short)] = tableHandle->freeSpacePage;
+		memcpy(pageHandle->data + sizeof(SM_FileHeader) + sizeof(short), &(tableHandle->freeSpacePage), sizeof(short));
+		//pageHandle->data[sizeof(SM_FileHeader) + sizeof(short)] = tableHandle->freeSpacePage;
 		markDirty(tableHandle->bm, pageHandle);
 		unpinPage(tableHandle->bm, pageHandle);
 		return insertRecord(rel, record);
 	}
-	newFreeSlot = freeSlot;
+	newFreeSlot = *freeSlot;
 	while(((pageData[newFreeSlot*sizeof(char)]) == FULL_SLOT) && newFreeSlot < tableHandle->pageCap){
 		newFreeSlot++;
 	}
 	if(newFreeSlot < tableHandle->pageCap){
-		pageHandle->data[0] = newFreeSlot;
+		*freeSlot = newFreeSlot;
 	}else{
-		pageHandle->data[0] = -1;
+		int *fullPointer = (int *)pageHandle->data;
+		*fullPointer = -1;
 	}
 	markDirty(tableHandle->bm, pageHandle);
 	unpinPage (tableHandle->bm, pageHandle);
@@ -185,15 +172,17 @@ RC deleteRecord (RM_TableData *rel, RID id){
 	recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID));
 	memset(pageHandle->data + recordOffset,0,tableHandle->recordSize + sizeof(RID)); // Set record to 0
 	// BUFFER MANAGER OPERATIONS
-	if(pageHandle->data[0] > id.slot || pageHandle->data[0] == -1){
-		pageHandle->data[0] = id.slot;
+	int *freeSlot = (int *)pageHandle->data;
+	if(*freeSlot > id.slot || *freeSlot == -1){
+		*freeSlot = id.slot;
 	}
 	markDirty(tableHandle->bm, pageHandle);
 	unpinPage (tableHandle->bm, pageHandle);
 	if(id.page < tableHandle->freeSpacePage){
 		tableHandle->freeSpacePage = id.page;
 		pinPage(tableHandle->bm, pageHandle, 0);
-		pageHandle->data[sizeof(SM_FileHeader) + sizeof(short)] = tableHandle->freeSpacePage;
+		memcpy(pageHandle->data + sizeof(SM_FileHeader) + sizeof(short), &(tableHandle->freeSpacePage), sizeof(short));
+		//pageHandle->data[sizeof(SM_FileHeader) + sizeof(short)] = tableHandle->freeSpacePage;
 		markDirty(tableHandle->bm, pageHandle);
 		unpinPage(tableHandle->bm, pageHandle);
 	}
@@ -225,6 +214,11 @@ RC getRecord (RM_TableData *rel, RID id, Record *record){
 	unpinPage(tableHandle->bm, pageHandle);
 	record->id = id;
 	record->data = data;
+	// printf("RETRIEVED RECORD: ");
+	// for(int i = 0; i<tableHandle->recordSize; i++){
+	// 	printf("%02x ", record->data[i] & 0xff);
+	// }
+	// printf("\n");
 	// GESTION DE ERRORES? SI NO HAY RECORD EN ESA UBICACION?
 	return RC_OK;
 }
@@ -305,6 +299,7 @@ RC getAttr (Record *record, Schema *schema, int attrNum, Value **value){
 		  	break;
 		  case DT_STRING:
 			*value = malloc(sizeof(DataType) + schema->typeLength[attrNum] + 1);
+			(*value)->v.stringV = malloc(schema->typeLength[attrNum]);
 			memcpy((*value)->v.stringV,record->data + attrOffset, schema->typeLength[attrNum]);
 			// Adds end of string
 			(*value)->v.stringV[schema->typeLength[attrNum]] = 0x00;
@@ -320,6 +315,7 @@ RC getAttr (Record *record, Schema *schema, int attrNum, Value **value){
 		  default: 
 			code = RC_RM_UNKOWN_DATATYPE;
 		}
+		(*value)->dt = schema->dataTypes[attrNum];
 	}else{
 		code = RC_RM_UNKOWN_DATATYPE;
 	}
