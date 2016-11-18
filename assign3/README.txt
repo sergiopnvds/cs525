@@ -23,28 +23,36 @@ Leader name: Victor Jose Portals
 +--------------------------------------------------------------+
 	2.File list
 +--------------------------------------------------------------+
+Makefile
+README.txt
 buffer_mgr.c
 buffer_mgr.h
 buffer_mgr_stat.c
 buffer_mgr_stat.h
 dberror.c
 dberror.h
-_DS_Store
 dt.h
-Makefile
-README.txt
+expr.c
+expr.h
+record_mgr.c
+record_mgr.h
+rm_serializer.c
 storage_mgr.c
 storage_mgr.h
+tables.h
 test_assign1_1.c
 test_assign1_2.c
 test_assign2_1.c
+test_assign2_2.c
+test_assign3_1.c
+test_expr.c
 test_helper.h
 
 
 +--------------------------------------------------------------+
 	3.Milestone 
 +--------------------------------------------------------------+
-Buffer manager first functional version.
+Record manager first functional version.
 
 +--------------------------------------------------------------+
 	4.Installation instruction
@@ -65,117 +73,107 @@ A clean instruction has been added to Makefile, it removes all .o and executable
 	5.Function descriptions
 +--------------------------------------------------------------+
 
-#initBufferPool:
+#initRecordManager:
 
-	Create a buffer pool and initializes its management data.
+	Initialize the record manager.
 
-#shutdownBufferPool:
+#shutdownRecordManager:
 	
-	Destroy buffer pool and free resources.
+	Shut down the record manager.
 
-#forceFlushPool:
+#createTable:
 	
-	Writes all pages marked as dirty to disk.
+	Create a new table with schema and name given.
 
-#markDirty:
+#openTable:
 	
-	Mark a page in buffer frame as dirty.
+	Open the table with the name given.
 
-#unpinPage:
+#closeTable:
 	
-	Remove pin between page frame and client.
+	Close the opened table.
 
-#forcePage:
+#deleteTable:
 	
-	Write page from buffer frame to file in disk.
+	Delete the table.
 
-#pinPage:
+#getNumTuples:
 	
-	Read page from disk if it is not already in buffer.
+	Obtain the total number of records.
 
-#getFrameContents:
+#insertRecord:
 	
-	Returns an array of PageNumberswhere the ith element is the number of the page stored in the ith page frame.
+	Insert a new record in the table.
 
-#getDirtyFlags:
+#deleteRecord:
 	
-	Returns an array of bools where the ith element is TRUE if the page stored in the ith page frame is dirty.
+	Delete the record from the table.
 
-#getFixCounts:
+#udpateRecord:
 	
-	Returns an array of ints where the ith element is the fix count of the page stored in the ith page frame.
+	Update the attributes of a certain record.
 
-#getNumReadIO:
+#getRecord:
 	
-	Returns the number of pages that have been read from disk since a buffer pool has been initialized.
+	Retrieve a certain record.
 
-#getNumWriteIO:
+#startScan:
 	
-	Returns the number of pages that have been writed to disk since a buffer pool has been initialized.
+	Initialize the scan.
 
-#findPageIndex:
+#next:
 	
-	Returns the index of a page inside frame buffer.
+	Retrieve the next record that matches with the expression given.
 
-#searchInsertPosition:
+#closeScan:
 	
-	Returns the insert position in a FIFO buffer discarding fixed.
+	Close the scan.
 
-#searchLowerTime:
+#getRecordSize:
 	
-	Returns the insert position in a LRU buffer discarding fixed.
+	Retrieves the size that a record occupies.
 
-#searchLowerTimeK:
+#createSchema:
 	
-	Returns the insert position in a LRU-K buffer discarding.
+	Create a Schema struct with the attributes given.
 
-#searchBitZero:
+#freeSchema:
 	
-	Returns the insert position in a CLOCK buffer discarding fixed.
+	Releases the memory occupied by the schema.
 
-#searchLowerFrequence:
+#createRecord:
 	
-	Returns the insert position in a LFU buffer discarding fixed.
+	Allocates the necessary space in memory of a record.
 
-#addHeap:
+#freeRecord:
 	
-	Add the value to the array like a heap.
+	Releases the memory occupied by a record.
+
+#getAttr:
+	
+	Retrieve the certain attribute from a record.
+
+#setAttr:
+	
+	Set the certain attribute from a record.
+
+#getAttrOffset:
+	
+	Return the relative offset of the attribute in a record.
+
+#getNumPagesSchema:
+	
+	Return the number of pages that occupies the schema.
+
+#calculatePageCap:
+	
+	Return the number of records that fits into a single page.
 
 +--------------------------------------------------------------+
 	6.Data structure
 +--------------------------------------------------------------+
-BM_BufferPool
+Schema
 
-BM_Buffer
+Record
 
-BM_ManagementData
-
-+--------------------------------------------------------------+
-	7.Extra credit
-+--------------------------------------------------------------+
-It has been implemented the CLOCK strategy and its test.
-It has been implemented the LFU strategy and its test.
-It has been implemented the LRU_K strategy and its test.
-
-+--------------------------------------------------------------+
-	8.Test cases
-+--------------------------------------------------------------+
-Additoinally, we include an extra file called "test_assign2_2.c" that include some extra test to check and validate optional replacement strategies.
-
-	#Test testCLOCK
-
-	#Test testLFU
-
-	#Test testLRUK
-
-+--------------------------------------------------------------+
-	9.Problems solved
-+--------------------------------------------------------------+
-
-# Insertion of page in frame buffer when the LRU or pointed frame is fixed.
-
-+--------------------------------------------------------------+
-	10.Problems to be solved
-+--------------------------------------------------------------+
-
-None
+RM_TableData

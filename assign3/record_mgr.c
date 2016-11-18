@@ -15,15 +15,78 @@ typedef struct RM_ScanMgmt {
     int totalNumSlots;
 } RM_ScanMgmt;
 
-// table and manager
+/**************************************************************************************************
+ * Function Name: initRecordManager
+ * Description:
+ *	Initialize the record manager.
+ *
+ * Parameters:
+ *	void *mgmtData
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC initRecordManager (void *mgmtData){
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: shutdownRecordManager
+ * Description:
+ *	Shut down the record manager.
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC shutdownRecordManager (){
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: createTable
+ * Description:
+ *	Create a new table with schema and name given.
+ *
+ * Parameters:
+ *  char   *name
+ *	Schema *schema
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC createTable (char *name, Schema *schema){
 
 	RC createStatus = createPageFile(name);
@@ -63,6 +126,30 @@ RC createTable (char *name, Schema *schema){
 	return RC_OK;
 }
 
+
+/**************************************************************************************************
+ * Function Name: openTable
+ * Description:
+ *	Open the table with the name given.
+ *
+ * Parameters:
+ *  RM_TableData *rel
+ *	char         *name
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC openTable (RM_TableData *rel, char *name){
 	TableHandle *tableHandle = malloc(sizeof(TableHandle));
 	Schema *schema = malloc(sizeof(Schema));
@@ -101,12 +188,31 @@ RC openTable (RM_TableData *rel, char *name){
 	rel->name = name;
 	rel->schema = schema;
 	rel->mgmtData = tableHandle;
-	// LLAMAMOS A INITBUFFERPOOL?
-	// QUIEN DECIDE STRATEGY?
-	//   "      "    NUMPAGES?
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: closeTable
+ * Description:
+ *	Close the opened table.
+ *
+ * Parameters:
+ *  RM_TableData *rel
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC closeTable (RM_TableData *rel){
 	TableHandle *tableHandle = rel->mgmtData;
 	// Store totalRecords
@@ -120,17 +226,88 @@ RC closeTable (RM_TableData *rel){
 	free(tableHandle);
 	return RC_OK;
 }
+
+
+/**************************************************************************************************
+ * Function Name: deleteTable
+ * Description:
+ *	Delete the table.
+ *
+ * Parameters:
+ *  char *name
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC deleteTable (char *name){
 	destroyPageFile(name);
 	//TODO: Free other resources if necessary
 	return RC_OK;
 }
+
+
+/**************************************************************************************************
+ * Function Name: getNumTuples
+ * Description:
+ *	Obtain the total number of records.
+ *
+ * Parameters:
+ *  RM_TableData *rel
+ *
+ * Return:
+ *	int: the number of tuples
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 int getNumTuples (RM_TableData *rel){
 	TableHandle *tableHandle = rel->mgmtData;
 	return tableHandle->totalRecords;
 }
 
-// handling records in a table
+
+/**************************************************************************************************
+ * Function Name: insertRecord
+ * Description:
+ *	Insert a new record in the table.
+ *
+ * Parameters:
+ *  RM_TableData *rel
+ *	Record       *record
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC insertRecord (RM_TableData *rel, Record *record){
 	int page, newFreeSlot, recordOffset;
 	int *freeSlot;
@@ -181,17 +358,40 @@ RC insertRecord (RM_TableData *rel, Record *record){
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: deleteRecord
+ * Description:
+ *	Delete the record from the table.
+ *
+ * Parameters:
+ *  RM_TableData *rel
+ *	RID          id
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC deleteRecord (RM_TableData *rel, RID id){
 	int recordOffset;
 	TableHandle *tableHandle = rel->mgmtData;
 	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
 	pinPage (tableHandle->bm, pageHandle, id.page);
-	// SET TO EMPTY IN HEADER DIRECTORY
+
 	pageHandle->data[sizeof(int) + id.slot*sizeof(char)] = 0x00;
-	// I THINK THIS IS OPTIONAL
+
 	recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID));
 	memset(pageHandle->data + recordOffset,0,tableHandle->recordSize + sizeof(RID)); // Set record to 0
-	// BUFFER MANAGER OPERATIONS
+
 	int *freeSlot = (int *)pageHandle->data;
 	if(*freeSlot > id.slot || *freeSlot == -1){
 		*freeSlot = id.slot;
@@ -202,15 +402,36 @@ RC deleteRecord (RM_TableData *rel, RID id){
 		tableHandle->freeSpacePage = id.page;
 		pinPage(tableHandle->bm, pageHandle, 0);
 		memcpy(pageHandle->data + sizeof(SM_FileHeader) + sizeof(short), &(tableHandle->freeSpacePage), sizeof(short));
-		//pageHandle->data[sizeof(SM_FileHeader) + sizeof(short)] = tableHandle->freeSpacePage;
 		markDirty(tableHandle->bm, pageHandle);
 		unpinPage(tableHandle->bm, pageHandle);
 	}
-	// GESTION DE ERRORES? SI NO HAY RECORD EN ESA UBICACION?
 	tableHandle->totalRecords--;
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: udpateRecord
+ * Description:
+ *	Update the attributes of a certain record.
+ *
+ * Parameters:
+ *  RM_TableData *rel
+ *	Record       *record
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC updateRecord (RM_TableData *rel, Record *record){
 	int recordOffset;
 	RID id;
@@ -226,6 +447,31 @@ RC updateRecord (RM_TableData *rel, Record *record){
 	return RC_OK;
 }
 
+
+/**************************************************************************************************
+ * Function Name: getRecord
+ * Description:
+ *	Retrieve a certain record.
+ *
+ * Parameters:
+ *  RM_TableData *rel
+ *  RID           id
+ *	Record       *record
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC getRecord (RM_TableData *rel, RID id, Record *record){
 	int recordOffset, code;
 	TableHandle *tableHandle = rel->mgmtData;
@@ -245,7 +491,31 @@ RC getRecord (RM_TableData *rel, RID id, Record *record){
 	return code;
 }
 
-// scans
+
+/**************************************************************************************************
+ * Function Name: startScan
+ * Description:
+ *	Initialize the scan.
+ *
+ * Parameters:
+ *  RM_TableData  *rel
+ *  RM_ScanHandle *scan
+ *	Expr          *cond
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC startScan (RM_TableData *rel, RM_ScanHandle *scan, Expr *cond){
 
 	TableHandle *tableHandle = rel->mgmtData;
@@ -269,6 +539,30 @@ RC startScan (RM_TableData *rel, RM_ScanHandle *scan, Expr *cond){
 	return RC_OK;
 }
 
+
+/**************************************************************************************************
+ * Function Name: next
+ * Description:
+ *	Retrieve the next record that matches with the expression given.
+ *
+ * Parameters:
+ *  RM_ScanHandle *scan
+ *	Record        *record
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC next (RM_ScanHandle *scan, Record *record){
 	
 	Value *result = malloc(sizeof(Value));
@@ -276,8 +570,10 @@ RC next (RM_ScanHandle *scan, Record *record){
 	RID *id = scanMgmt->id;
 
 	bool found = false;
-	for (int i = id->page; i < scanMgmt->totalNumPages+1; i++){
-		for (int j = id->slot; j < scanMgmt->totalNumSlots; j++){
+	int i;
+	for (i = id->page; i < scanMgmt->totalNumPages+1; i++){
+		int j;
+		for (j = id->slot; j < scanMgmt->totalNumSlots; j++){
 			id->page = i;
 			id->slot = j;
 			if(getRecord (scan->rel, *id, record) == RC_OK){
@@ -304,12 +600,55 @@ RC next (RM_ScanHandle *scan, Record *record){
 
 }
 
+/**************************************************************************************************
+ * Function Name: closeScan
+ * Description:
+ *	Close the scan.
+ *
+ * Parameters:
+ *  RM_ScanHandle *scan
+ *
+ * Return:
+ *	RC: returned code
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC closeScan (RM_ScanHandle *scan){
 	free(scan->mgmtData);
 	return RC_OK;
 }
 
-// dealing with schemas
+/**************************************************************************************************
+ * Function Name: getRecordSize
+ * Description:
+ *	Retrieves the size that a record occupies.
+ *
+ * Parameters:
+ *  RM_ScanHandle *scan
+ *
+ * Return:
+ *	int: the size of the record.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 int getRecordSize (Schema *schema){
 	int recordSize = 0;
 	int i;
@@ -334,6 +673,33 @@ int getRecordSize (Schema *schema){
 	return recordSize;
 }
 
+/**************************************************************************************************
+ * Function Name: createSchema
+ * Description:
+ *	Create a Schema struct with the attributes given.
+ *
+ * Parameters:
+ *  int numAttr
+ *	char **attrNames
+ *	DataType *dataTypes
+ *	int *typeLength
+ *  int keySize
+ *  int *keys	
+ *
+ * Return:
+ *	Schema: the schema struct.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 Schema *createSchema (int numAttr, char **attrNames, DataType *dataTypes, int *typeLength, int keySize, int *keys){
 	Schema *newSchema = malloc(sizeof(Schema));
 	newSchema->numAttr = numAttr;
@@ -345,6 +711,28 @@ Schema *createSchema (int numAttr, char **attrNames, DataType *dataTypes, int *t
 	return newSchema;
 }
 
+/**************************************************************************************************
+ * Function Name: freeSchema
+ * Description:
+ *	Releases the memory occupied by the schema.
+ *
+ * Parameters:
+ *	Schema *schema
+ *
+ * Return:
+ *	RC: returned code.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC freeSchema (Schema *schema){
 	free(schema->attrNames);
 	free(schema->dataTypes);
@@ -354,19 +742,88 @@ RC freeSchema (Schema *schema){
 	return RC_OK;
 }
 
-// dealing with records and attribute values
+/**************************************************************************************************
+ * Function Name: createRecord
+ * Description:
+ *	Allocates the necessary space in memory of a record.
+ *
+ * Parameters:
+ *	Record **record
+ *	Schema *schema
+ *
+ * Return:
+ *	RC: returned code.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC createRecord (Record **record, Schema *schema){
 	*record = malloc(sizeof(Record));
 	(*record)->data = calloc(1, getRecordSize(schema));
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: freeRecord
+ * Description:
+ *	Releases the memory occupied by a record.
+ *
+ * Parameters:
+ *	Record **record
+ *
+ * Return:
+ *	RC: returned code.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC freeRecord (Record *record){
 	free(record->data);
 	free(record);
 	return RC_OK;
 }
 
+/**************************************************************************************************
+ * Function Name: getAttr
+ * Description:
+ *	Retrieve the certain attribute from a record.
+ *
+ * Parameters:
+ *	Record **record
+ *	Schema *schema
+ *  int attrNum
+ *  Value **value
+ *
+ * Return:
+ *	RC: returned code.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC getAttr (Record *record, Schema *schema, int attrNum, Value **value){
 	int attrOffset;
 	RC code = RC_OK;
@@ -401,6 +858,31 @@ RC getAttr (Record *record, Schema *schema, int attrNum, Value **value){
 	return code;
 }
 
+/**************************************************************************************************
+ * Function Name: setAttr
+ * Description:
+ *	Set the certain attribute from a record.
+ *
+ * Parameters:
+ *	Record **record
+ *	Schema *schema
+ *  int attrNum
+ *  Value **value
+ *
+ * Return:
+ *	RC: returned code.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 RC setAttr (Record *record, Schema *schema, int attrNum, Value *value){
 	int attrOffset;
 	RC code = RC_OK;
@@ -427,8 +909,29 @@ RC setAttr (Record *record, Schema *schema, int attrNum, Value *value){
 	return code;
 }
 
-// Auxiliary functions
-
+/**************************************************************************************************
+ * Function Name: getAttrOffset
+ * Description:
+ *	Return the relative offset of the attribute in a record.
+ *
+ * Parameters:
+ *	Schema *schema
+ *  int attrNum
+ *
+ * Return:
+ *	int: the offset.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 int getAttrOffset(Schema *schema, int attrNum){
 	int attrOffset = 0;
 	int i;
@@ -453,6 +956,28 @@ int getAttrOffset(Schema *schema, int attrNum){
 	return attrOffset;
 }
 
+/**************************************************************************************************
+ * Function Name: getNumPagesSchema
+ * Description:
+ *	Return the number of pages that occupies the schema.
+ *
+ * Parameters:
+ *  char *name
+ *
+ * Return:
+ *	short: the number of pages.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 short getNumPagesSchema(char *name){
   	FILE *file = fopen(name, "r+");
   	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
@@ -461,6 +986,28 @@ short getNumPagesSchema(char *name){
   	return tableInfoSize;
 }
 
+/**************************************************************************************************
+ * Function Name: calculatePageCap
+ * Description:
+ *	Return the number of records that fits into a single page.
+ *
+ * Parameters:
+ *  Schema *schema
+ *
+ * Return:
+ *	int: number of records.
+ *
+ * Author:
+ *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *
+ * History:
+ *	Date        Name                                              Content
+ *	----------  ------------------------------------------------  ------------------------------
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
+ *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *                                                                  	add comments.
+**************************************************************************************************/
 int calculatePageCap(Schema *schema){
 	int recordSize, numRecords;
 	recordSize = getRecordSize(schema) + (int)sizeof(RID);
