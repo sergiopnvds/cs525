@@ -360,7 +360,6 @@ RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber
 		buffer->insertPos = (insertionIndex + 1)%bm->numPages;
 		buffer->lastUseTime[insertionIndex] = buffer->timeCounter;
 		if(buffer->lastUseTimeLRUK != NULL){
-			printf("REINICIA COUNTERS\n");
 			addHeap(buffer->lastUseTimeLRUK, insertionIndex, buffer->K, -1);
 			addHeap(buffer->lastUseTimeLRUK, insertionIndex, buffer->K, buffer->timeCounter);
 		}

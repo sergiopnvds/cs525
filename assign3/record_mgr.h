@@ -1,6 +1,7 @@
 #ifndef RECORD_MGR_H
 #define RECORD_MGR_H
 
+#include "buffer_mgr.h"
 #include "dberror.h"
 #include "expr.h"
 #include "tables.h"
@@ -51,6 +52,7 @@ typedef struct TableHandle
   int numPagesSchema;
   int recordSize;
   short freeSpacePage;
+  short totalRecords;
 } TableHandle;
 // Auxiliary functions
 
