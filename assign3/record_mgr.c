@@ -38,7 +38,8 @@ RC createTable (char *name, Schema *schema){
 	// Write number of attributes
 	fwrite(&(schema->numAttr), sizeof(int), 1, file);
 	// Write each string preceded by its lenght
-	for(int i = 0; i < schema->numAttr; i++){
+	int i;
+	for(i = 0; i < schema->numAttr; i++){
 		short attrlen = (short)strlen(schema->attrNames[i]);
 		fwrite(&attrlen, sizeof(short), 1, file);
 		fwrite(schema->attrNames[i], sizeof(char), attrlen, file);
@@ -76,7 +77,8 @@ RC openTable (RM_TableData *rel, char *name){
 
 	fread(&(schema->numAttr), sizeof(int), 1, file);
 	schema->attrNames = malloc(schema->numAttr * sizeof(char*));
-	for(int i = 0; i < schema->numAttr;  i++){
+	int i;
+	for(i = 0; i < schema->numAttr;  i++){
 		short attrNameLen = 0;
 		fread(&attrNameLen, sizeof(short), 1, file);
 		schema->attrNames[i] = malloc(attrNameLen);
@@ -310,7 +312,8 @@ RC closeScan (RM_ScanHandle *scan){
 // dealing with schemas
 int getRecordSize (Schema *schema){
 	int recordSize = 0;
-	for(int i = 0; i < schema->numAttr && recordSize != RC_RM_UNKOWN_DATATYPE; i++){
+	int i;
+	for(i = 0; i < schema->numAttr && recordSize != RC_RM_UNKOWN_DATATYPE; i++){
 		switch(schema->dataTypes[i]){
 		  case DT_INT: 
 		  	recordSize += sizeof(int);
@@ -428,7 +431,8 @@ RC setAttr (Record *record, Schema *schema, int attrNum, Value *value){
 
 int getAttrOffset(Schema *schema, int attrNum){
 	int attrOffset = 0;
-	for(int i = 0; i < attrNum && attrOffset >= 0; i++){
+	int i;
+	for(i = 0; i < attrNum && attrOffset >= 0; i++){
 		switch(schema->dataTypes[i]){
 		  case DT_INT: 
 		  	attrOffset += sizeof(int);
