@@ -229,7 +229,7 @@ RC getRecord (RM_TableData *rel, RID id, Record *record){
 	TableHandle *tableHandle = rel->mgmtData;
 	BM_PageHandle *pageHandle = malloc(sizeof(BM_PageHandle));
 	pinPage (tableHandle->bm, pageHandle, id.page);
-	if(pageHandle->data[sizeof(int) + id.slot] == 0x00){
+	if(pageHandle->data[sizeof(int) + id.slot*sizeof(char)] == 0x00){
 		code = -1;
 	}else{
 		recordOffset = sizeof(int) + tableHandle->pageCap * sizeof(char) + id.slot*(tableHandle->recordSize + sizeof(RID)) + sizeof(RID);
@@ -254,7 +254,7 @@ RC startScan (RM_TableData *rel, RM_ScanHandle *scan, Expr *cond){
 	openPageFile(rel->name, fileHandle);
 	scanMgmt->totalNumPages = fileHandle->totalNumPages - tableHandle->numPagesSchema;
 	closePageFile(fileHandle);
-	scanMgmt->totalNumSlots = tableHandle->recordSize;
+	scanMgmt->totalNumSlots = tableHandle->pageCap;
 	scanMgmt->cond = cond;
 
 	scanMgmt->id = (RID *) calloc(1,sizeof(RID));
@@ -461,7 +461,7 @@ int calculatePageCap(Schema *schema){
 	recordSize = getRecordSize(schema) + (int)sizeof(RID);
 	// -1 is for free slot pointer
 	numRecords = (PAGE_SIZE - 1)/(sizeof(char) + recordSize);
-	//return numRecords;
+	return numRecords;
 }
 
 
