@@ -3,7 +3,7 @@ CFLAGS=-g
 DEPS = dberror.h storage_mgr.h buffer_mgr.h buffer_mgr_stat.h
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -std=gnu99 -c -o $@ $< $(CFLAGS)
 
 test_assign2: test_assign2_1 test_assign2_2
 
