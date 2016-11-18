@@ -24,8 +24,5 @@ test_assign1_1: test_assign1_1.o storage_mgr.o dberror.o
 test_assign1_2: test_assign1_2.o storage_mgr.o dberror.o 
 	$(CC) -o $@ $^ -I.
 
-dev_test:  dev_test.o storage_mgr.o buffer_mgr.o buffer_mgr_stat.o record_mgr.o rm_serializer.o expr.o dberror.o 
-	$(CC) -o $@ $^ -I.
-
 clean:
 	rm -f *.o test_assign1_1 test_assign1_2 test_assign2_1 test_assign2_2 test_assign3_1
