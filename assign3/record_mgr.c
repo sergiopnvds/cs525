@@ -274,7 +274,7 @@ RC next (RM_ScanHandle *scan, Record *record){
 	RID *id = scanMgmt->id;
 
 	bool found = false;
-	for (int i = id->page; i < scanMgmt->totalNumPages; i++){
+	for (int i = id->page; i < scanMgmt->totalNumPages+1; i++){
 		for (int j = id->slot; j < scanMgmt->totalNumSlots; j++){
 			id->page = i;
 			id->slot = j;
@@ -285,6 +285,7 @@ RC next (RM_ScanHandle *scan, Record *record){
 				if(!scanMgmt->cond || (result->dt == DT_BOOL && result->v.boolV))
 				{
 					found = true;
+					id->slot++;
 					break;
 				}
 			}
@@ -463,7 +464,3 @@ int calculatePageCap(Schema *schema){
 	numRecords = (PAGE_SIZE - 1)/(sizeof(char) + recordSize);
 	return numRecords;
 }
-
-
-
-
