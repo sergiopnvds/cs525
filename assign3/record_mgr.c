@@ -107,7 +107,7 @@ RC createTable (char *name, Schema *schema){
 		fwrite(&attrlen, sizeof(short), 1, file);
 		fwrite(schema->attrNames[i], sizeof(char), attrlen, file);
 	}
-	// writes 
+	// Write the differents attributes of the schema
 	fwrite(schema->dataTypes, sizeof(int), schema->numAttr, file);
 	fwrite(schema->typeLength, sizeof(int), schema->numAttr, file);
 	fwrite(&(schema->keySize), sizeof(int), 1, file);
@@ -118,6 +118,8 @@ RC createTable (char *name, Schema *schema){
 	short numPagesSchema = schemaSize/PAGE_SIZE + 1;
 	short freeSpacePage = numPagesSchema;
 	fseek(file, sizeof(SM_FileHeader), SEEK_SET);
+
+	// Write additional necessary attributes
 	fwrite(&numPagesSchema, sizeof(short), 1, file);
 	fwrite(&freeSpacePage, sizeof(short), 1, file);
 	fwrite(&totalRecords, sizeof(short), 1, file);
@@ -140,14 +142,14 @@ RC createTable (char *name, Schema *schema){
  *	RC: returned code
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu>
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Initialization.
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main logic.
+ *	2016-11-15  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 RC openTable (RM_TableData *rel, char *name){
@@ -203,14 +205,14 @@ RC openTable (RM_TableData *rel, char *name){
  *	RC: returned code
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu>
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Initialization.
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main logic.
+ *	2016-11-15  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 RC closeTable (RM_TableData *rel){
@@ -240,19 +242,18 @@ RC closeTable (RM_TableData *rel){
  *	RC: returned code
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu>
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Initialization.
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main logic.
+ *	2016-11-15  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 RC deleteTable (char *name){
 	destroyPageFile(name);
-	//TODO: Free other resources if necessary
 	return RC_OK;
 }
 
@@ -371,14 +372,14 @@ RC insertRecord (RM_TableData *rel, Record *record){
  *	RC: returned code
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Jose Carmona <jcarmonalopez@hawk.iit.edu>
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-13  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Initialization.
+ *	2016-11-13  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Main logic.
+ *	2016-11-16  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 RC deleteRecord (RM_TableData *rel, RID id){
@@ -506,14 +507,14 @@ RC getRecord (RM_TableData *rel, RID id, Record *record){
  *	RC: returned code
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Jose Carmona <jcarmonalopez@hawk.iit.edu>
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-13  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Initialization.
+ *	2016-11-13  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Main logic.
+ *	2016-11-16  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 RC startScan (RM_TableData *rel, RM_ScanHandle *scan, Expr *cond){
@@ -553,14 +554,14 @@ RC startScan (RM_TableData *rel, RM_ScanHandle *scan, Expr *cond){
  *	RC: returned code
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Jose Carmona <jcarmonalopez@hawk.iit.edu>
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-13  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Initialization.
+ *	2016-11-13  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Main logic.
+ *	2016-11-16  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 RC next (RM_ScanHandle *scan, Record *record){
@@ -612,14 +613,14 @@ RC next (RM_ScanHandle *scan, Record *record){
  *	RC: returned code
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Jose Carmona <jcarmonalopez@hawk.iit.edu>
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-13  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Initialization.
+ *	2016-11-13  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Main logic.
+ *	2016-11-16  Jose Carmona     <jcarmonalopez@hawk.iit.edu>   Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 RC closeScan (RM_ScanHandle *scan){
@@ -873,14 +874,14 @@ RC getAttr (Record *record, Schema *schema, int attrNum, Value **value){
  *	RC: returned code.
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu> 
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Initialization.
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main logic.
+ *	2016-11-15  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 RC setAttr (Record *record, Schema *schema, int attrNum, Value *value){
@@ -922,7 +923,7 @@ RC setAttr (Record *record, Schema *schema, int attrNum, Value *value){
  *	int: the offset.
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu> 
  *
  * History:
  *	Date        Name                                              Content
@@ -936,6 +937,7 @@ int getAttrOffset(Schema *schema, int attrNum){
 	int attrOffset = 0;
 	int i;
 	for(i = 0; i < attrNum && attrOffset >= 0; i++){
+		// adding the size depending of each datatype.
 		switch(schema->dataTypes[i]){
 		  case DT_INT: 
 		  	attrOffset += sizeof(int);
@@ -968,14 +970,14 @@ int getAttrOffset(Schema *schema, int attrNum){
  *	short: the number of pages.
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu> 
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Initialization.
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main logic.
+ *	2016-11-15  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 short getNumPagesSchema(char *name){
@@ -998,20 +1000,22 @@ short getNumPagesSchema(char *name){
  *	int: number of records.
  *
  * Author:
- *	Victor Portals <vportalslorenzo@hawk.iit.edu>
+ *	Sergio Penavades <spenavadessuarez@hawk.iit.edu> 
  *
  * History:
  *	Date        Name                                              Content
  *	----------  ------------------------------------------------  ------------------------------
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Initialization.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Main logic.
- *	2016-11-10  Victor Portals   <vportalslorenzo@hawk.iit.edu>   Add header comment,
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Initialization.
+ *	2016-11-12  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Main logic.
+ *	2016-11-15  Sergio Penavades <spenavadessuarez@hawk.iit.edu>  Add header comment,
  *                                                                  	add comments.
 **************************************************************************************************/
 int calculatePageCap(Schema *schema){
 	int recordSize, numRecords;
 	recordSize = getRecordSize(schema) + (int)sizeof(RID);
 	// -1 is for free slot pointer
+	// first byte of each record is to specify if it's
+	// full or empty
 	numRecords = (PAGE_SIZE - 1)/(sizeof(char) + recordSize);
 	return numRecords;
 }
