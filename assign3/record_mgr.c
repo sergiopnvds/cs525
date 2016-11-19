@@ -8,13 +8,6 @@
 #include "expr.h"
 #include "tables.h"
 
-typedef struct RM_ScanMgmt {
-    Expr *cond;
-    RID *id;
-    int totalNumPages;
-    int totalNumSlots;
-} RM_ScanMgmt;
-
 /**************************************************************************************************
  * Function Name: initRecordManager
  * Description:

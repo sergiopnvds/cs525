@@ -54,6 +54,13 @@ typedef struct TableHandle
   short freeSpacePage;
   short totalRecords;
 } TableHandle;
+
+typedef struct RM_ScanMgmt {
+    Expr *cond;
+    RID *id;
+    int totalNumPages;
+    int totalNumSlots;
+} RM_ScanMgmt;
 // Auxiliary functions
 
 short getNumPagesSchema(char *name);
