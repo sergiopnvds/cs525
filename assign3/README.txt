@@ -1,6 +1,6 @@
 
 ################################################################
-	CS525 ASSIGNMENT 2 - BUFFER MANAGER
+	CS525 ASSIGNMENT 3 - RECORD MANAGER
 ################################################################
 
 +--------------------------------------------------------------+
@@ -63,7 +63,7 @@ The procedure will be to open a terminal window and compile the code excuting th
 
 	$ make
 
-This "Makefile" is prepared to compile all files belonged to the Buffer Manager and provide test_assign2_1 and test_assign2_2 executable files.
+This "Makefile" is prepared to compile all files belonged to the Buffer Manager and provide test_assign3_1 file.
 
 A clean instruction has been added to Makefile, it removes all .o and executable files:
 
@@ -177,3 +177,31 @@ Schema
 Record
 
 RM_TableData
+
+TableHandle
+
+RM_ScanMgmt
+
++--------------------------------------------------------------+
+        7.Extra credit
++--------------------------------------------------------------+
+
+None
+
++--------------------------------------------------------------+
+        8.Test cases
++--------------------------------------------------------------+
+
+No extra test cases added
+
++--------------------------------------------------------------+
+        9.Problems solved
++--------------------------------------------------------------+
+
+# Schema handling and slot mapping.
+
++--------------------------------------------------------------+
+        10.Problems to be solved
++--------------------------------------------------------------+
+
+None
